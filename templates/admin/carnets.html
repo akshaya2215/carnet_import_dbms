@@ -1,33 +1,40 @@
 {% extends "admin/base_admin.html" %}
-{% block title %}Carnets – Admin{% endblock %}
-{% block page_title %}Carnets{% endblock %}
+{% block title %}Carnets — Admin{% endblock %}
+{% block page_title %}Carnets de Passages{% endblock %}
+
 {% block content %}
-<div class="card">
-  <div class="card-header d-flex justify-content-between align-items-center py-3">
-    <span class="fw-700"><i class="bi bi-card-text me-2"></i>Carnets de Passages</span>
-    <a href="{{ url_for('admin_carnet_add') }}" class="btn btn-primary btn-sm"><i class="bi bi-plus me-1"></i>Add</a>
+<div class="table-toolbar">
+  <input type="text" class="form-control search-box" placeholder="Search carnets…"
+         data-search-table="carnetTable" aria-label="Search">
+  <div class="ms-auto">
+    <a href="{{ url_for('admin_carnet_add') }}" class="btn btn-primary btn-sm">+ Add carnet</a>
   </div>
-  <div class="card-body p-0">
-    <div class="table-responsive">
-      <table class="table table-hover mb-0">
-        <thead class="table-light"><tr><th>#</th><th>Carnet No.</th><th>Country</th><th>Issue Date</th><th>Expiry Date</th><th>Status</th><th>Actions</th></tr></thead>
+</div>
+<div class="app-card">
+  <div class="app-card-body p-0">
+    {% if rows %}
+    <div class="table-scroll">
+      <table class="table mb-0" id="carnetTable">
+        <thead>
+          <tr><th>Carnet number</th><th>Issuing country</th><th>Issue date</th><th>Expiry date</th><th>Status</th><th></th></tr>
+        </thead>
         <tbody>
-          {% for c in carnets %}
-          <tr>
-            <td>{{ c.carnet_id }}</td>
-            <td class="font-monospace fw-600">{{ c.carnet_number }}</td>
-            <td>{{ c.issuing_country }}</td>
-            <td>{{ c.issue_date }}</td>
-            <td>{{ c.expiry_date }}</td>
+          {% for r in rows %}
+          <tr {% if r.status == 'EXPIRED' %}style="background:var(--c-danger-bg);"{% endif %}>
+            <td class="mono fw-600">{{ r.carnet_number }}</td>
+            <td>{{ r.issuing_country }}</td>
+            <td class="text-muted">{{ r.issue_date }}</td>
+            <td>{{ r.expiry_date }}</td>
             <td>
-              {% if c.status == 'ACTIVE' %}<span class="badge bg-success">ACTIVE</span>
-              {% elif c.status == 'EXPIRED' %}<span class="badge bg-danger">EXPIRED</span>
-              {% else %}<span class="badge bg-secondary">CANCELLED</span>{% endif %}
+              {% if r.status == 'ACTIVE' %}<span class="badge badge-active">Active</span>
+              {% elif r.status == 'EXPIRED' %}<span class="badge badge-expired">Expired</span>
+              {% else %}<span class="badge badge-inactive">{{ r.status }}</span>{% endif %}
             </td>
-            <td>
-              <a href="{{ url_for('admin_carnet_edit', cid=c.carnet_id) }}" class="btn btn-sm btn-outline-primary btn-action me-1"><i class="bi bi-pencil"></i></a>
-              <form method="POST" action="{{ url_for('admin_carnet_delete', cid=c.carnet_id) }}" class="d-inline" onsubmit="return confirm('Delete?')">
-                <button class="btn btn-sm btn-outline-danger btn-action"><i class="bi bi-trash"></i></button>
+            <td style="white-space:nowrap;">
+              <a href="{{ url_for('admin_carnet_edit', cid=r.carnet_id) }}" class="btn btn-secondary btn-sm">Edit</a>
+              <form method="POST" action="{{ url_for('admin_carnet_delete', cid=r.carnet_id) }}"
+                    class="d-inline" data-confirm="Delete carnet {{ r.carnet_number }}?">
+                <button type="submit" class="btn btn-outline-danger btn-sm">Delete</button>
               </form>
             </td>
           </tr>
@@ -35,6 +42,13 @@
         </tbody>
       </table>
     </div>
+    {% else %}
+    <div class="empty-state">
+      <div class="empty-state-icon">📄</div>
+      <h4>No carnets on file</h4>
+      <p>Carnets are added during a temporary import check.</p>
+    </div>
+    {% endif %}
   </div>
 </div>
 {% endblock %}

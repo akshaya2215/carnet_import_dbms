@@ -1,42 +1,57 @@
 {% extends "admin/base_admin.html" %}
-{% block title %}Rules – Admin{% endblock %}
-{% block page_title %}Eligibility Rules{% endblock %}
+{% block title %}Rules — Admin{% endblock %}
+{% block page_title %}Eligibility rules{% endblock %}
+
 {% block content %}
-<div class="card">
-  <div class="card-header d-flex justify-content-between align-items-center py-3">
-    <span class="fw-700"><i class="bi bi-list-check me-2"></i>Eligibility Rules</span>
-    <a href="{{ url_for('admin_rule_add') }}" class="btn btn-primary btn-sm"><i class="bi bi-plus me-1"></i>Add Rule</a>
+<div class="table-toolbar">
+  <input type="text" class="form-control search-box" placeholder="Search rules…"
+         data-search-table="rulesTable" aria-label="Search rules">
+  <div class="ms-auto">
+    <a href="{{ url_for('admin_rule_add') }}" class="btn btn-primary btn-sm">+ Add rule</a>
   </div>
-  <div class="card-body p-0">
-    <div class="table-responsive">
-      <table class="table table-hover mb-0">
-        <thead class="table-light">
-          <tr><th>#</th><th>Rule Name</th><th>Type</th><th>Operator</th><th>Expected</th><th>Import Type</th><th>Effective</th><th>Active</th><th>Actions</th></tr>
+</div>
+
+<div class="app-card">
+  <div class="app-card-body p-0">
+    {% if rows %}
+    <div class="table-scroll">
+      <table class="table mb-0" id="rulesTable">
+        <thead>
+          <tr>
+            <th style="width:40px;">Active</th>
+            <th>Rule name</th>
+            <th>Type</th>
+            <th>Requirement</th>
+            <th>Import category</th>
+            <th>Effective from</th>
+            <th>Last updated</th>
+            <th></th>
+          </tr>
         </thead>
         <tbody>
-          {% for r in rules %}
-          <tr class="{% if not r.is_active %}table-secondary text-muted{% endif %}">
-            <td>{{ r.rule_id }}</td>
-            <td class="fw-600">{{ r.rule_name }}</td>
-            <td><span class="badge bg-primary">{{ r.rule_type.replace('_',' ') }}</span></td>
-            <td class="font-monospace">{{ r.operator }}</td>
-            <td class="font-monospace">{{ r.expected_value }}</td>
-            <td>{{ r.type_name.replace('_',' ') if r.type_name else 'All Types' }}</td>
-            <td class="small text-muted">{{ r.effective_date }}</td>
+          {% for r in rows %}
+          <tr {% if not r.is_active %}style="opacity:.55;"{% endif %}>
             <td>
-              {% if r.is_active %}<span class="badge bg-success">Active</span>
-              {% else %}<span class="badge bg-secondary">Inactive</span>{% endif %}
-            </td>
-            <td class="d-flex gap-1">
               <form method="POST" action="{{ url_for('admin_rule_toggle', rid=r.rule_id) }}" class="d-inline">
-                <button class="btn btn-sm {% if r.is_active %}btn-outline-warning{% else %}btn-outline-success{% endif %} btn-action"
-                        title="{% if r.is_active %}Deactivate{% else %}Activate{% endif %}">
-                  <i class="bi {% if r.is_active %}bi-toggle-on{% else %}bi-toggle-off{% endif %}"></i>
-                </button>
+                <div class="form-check form-switch mb-0">
+                  <input class="form-check-input rule-toggle" type="checkbox"
+                         {% if r.is_active %}checked{% endif %}
+                         title="{{ 'Disable' if r.is_active else 'Enable' }} rule"
+                         aria-label="{{ r.rule_name }} active">
+                </div>
               </form>
-              <a href="{{ url_for('admin_rule_edit', rid=r.rule_id) }}" class="btn btn-sm btn-outline-primary btn-action"><i class="bi bi-pencil"></i></a>
-              <form method="POST" action="{{ url_for('admin_rule_delete', rid=r.rule_id) }}" class="d-inline" onsubmit="return confirm('Delete this rule?')">
-                <button class="btn btn-sm btn-outline-danger btn-action"><i class="bi bi-trash"></i></button>
+            </td>
+            <td class="fw-600">{{ r.rule_name }}</td>
+            <td><span class="badge badge-inactive" style="font-size:.65rem;text-transform:uppercase;letter-spacing:.03em;">{{ r.rule_type.replace('_',' ') }}</span></td>
+            <td class="mono">{{ r.operator }} {{ r.expected_value }}</td>
+            <td>{{ r.import_type or 'All categories' }}</td>
+            <td class="text-muted">{{ r.effective_date }}</td>
+            <td class="text-muted">{{ r.last_updated }}</td>
+            <td style="white-space:nowrap;">
+              <a href="{{ url_for('admin_rule_edit', rid=r.rule_id) }}" class="btn btn-secondary btn-sm">Edit</a>
+              <form method="POST" action="{{ url_for('admin_rule_delete', rid=r.rule_id) }}"
+                    class="d-inline" data-confirm="Delete rule '{{ r.rule_name }}'?">
+                <button type="submit" class="btn btn-outline-danger btn-sm">Delete</button>
               </form>
             </td>
           </tr>
@@ -44,9 +59,14 @@
         </tbody>
       </table>
     </div>
+    {% else %}
+    <div class="empty-state">
+      <div class="empty-state-icon">📋</div>
+      <h4>No rules defined</h4>
+      <p>Add the first eligibility rule to start evaluating vehicles.</p>
+      <a href="{{ url_for('admin_rule_add') }}" class="btn btn-primary btn-sm">Add rule</a>
+    </div>
+    {% endif %}
   </div>
-</div>
-<div class="mt-3">
-  <a href="{{ url_for('admin_auditlog') }}" class="btn btn-outline-secondary btn-sm"><i class="bi bi-journal-text me-1"></i>View Rule Audit Log</a>
 </div>
 {% endblock %}

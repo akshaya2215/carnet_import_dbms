@@ -1,65 +1,86 @@
 {% extends "base.html" %}
-{% block title %}About – Indian Vehicle Import System{% endblock %}
+{% block title %}About — India Vehicle Import Eligibility{% endblock %}
 
 {% block content %}
 <div class="row justify-content-center">
-  <div class="col-lg-9">
-    <h1 class="fw-700 mb-4"><i class="bi bi-info-circle text-primary me-2"></i>About This Project</h1>
+<div class="col-lg-8">
 
-    <div class="card mb-4">
-      <div class="card-body">
-        <h5 class="fw-700">Project Overview</h5>
-        <p>The <strong>Indian Vehicle Import Eligibility &amp; Carnet Management System</strong> is a university DBMS project demonstrating advanced MySQL features. The <em>database</em> — not the Python code — makes all eligibility decisions through a stored procedure, triggers, and views.</p>
-        <p>It covers:</p>
-        <ul>
-          <li>Carnet de Passages en Douane management</li>
-          <li>Rule-based eligibility checking (vehicle age, fuel type, steering side, engine CC, carnet validity, document submission)</li>
-          <li>Full audit trail via triggers</li>
-          <li>Admin CRUD interface with role-based access</li>
-        </ul>
-      </div>
-    </div>
+  <div class="mb-4">
+    <h1 class="mb-1">About this system</h1>
+    <p class="text-muted" style="font-size:.9375rem;">University DBMS project — Indian Vehicle Import Eligibility &amp; Carnet Management</p>
+  </div>
 
-    <!-- SQL Concepts Demonstrated -->
-    <div class="card mb-4">
-      <div class="card-header bg-dark text-white py-3">
-        <h5 class="mb-0"><i class="bi bi-code-square me-2"></i>SQL Concepts Demonstrated</h5>
+  <div class="app-card mb-3">
+    <div class="app-card-header"><h3>Purpose</h3></div>
+    <div class="app-card-body">
+      <p>This system demonstrates how a relational database — not application code — can be the authoritative decision engine for a compliance workflow. A MySQL stored procedure evaluates every active rule and records a pass or fail per rule. Flask renders the output; no eligibility logic lives in Python.</p>
+      <p>The primary subject is the Carnet de Passages en Douane (CPD), an international customs document that lets a vehicle be temporarily imported without paying full import duties, recognised in over 100 AIT/FIA member countries including India.</p>
+      <div class="alert alert-warning mt-3 mb-0">
+        <strong>Disclaimer.</strong> This is an educational project. Always verify requirements with official Indian authorities (DGFT, Customs, Ministry of Road Transport) before any real import.
       </div>
-      <div class="card-body p-0">
-        <table class="table mb-0">
-          <thead class="table-light"><tr><th>Concept</th><th>Where Used</th><th>File</th></tr></thead>
-          <tbody>
-            <tr><td><strong>DDL – CREATE / DROP</strong></td><td>14 tables, indexes, FKs</td><td><code>sql/01_schema.sql</code></td></tr>
-            <tr><td><strong>Stored Function</strong></td><td>CalculateVehicleAge()</td><td><code>sql/02_functions_procedures.sql</code></td></tr>
-            <tr><td><strong>Stored Procedure</strong></td><td>CheckEligibility() – cursor loop, CASE, SIGNAL</td><td><code>sql/02_functions_procedures.sql</code></td></tr>
-            <tr><td><strong>Cursor</strong></td><td>Iterates active rules inside CheckEligibility</td><td><code>sql/02_functions_procedures.sql</code></td></tr>
-            <tr><td><strong>CASE expression</strong></td><td>Rule operator evaluation inside procedure; reports</td><td><code>sql/02_functions_procedures.sql, 06_showcase_queries.sql</code></td></tr>
-            <tr><td><strong>Triggers (5)</strong></td><td>Carnet auto-expiry, rule audit log, UNDER_REVIEW</td><td><code>sql/03_triggers.sql</code></td></tr>
-            <tr><td><strong>Views (5)</strong></td><td>Eligible vehicles, active carnets, pending apps, missing docs, expiring carnets</td><td><code>sql/04_views.sql</code></td></tr>
-            <tr><td><strong>JOIN (INNER + LEFT)</strong></td><td>Application report joining 6 tables</td><td><code>sql/06_showcase_queries.sql, app.py</code></td></tr>
-            <tr><td><strong>GROUP BY / HAVING</strong></td><td>Applications per country, countries with &gt;2 apps</td><td><code>sql/06_showcase_queries.sql</code></td></tr>
-            <tr><td><strong>Subquery</strong></td><td>Vehicles older than average age</td><td><code>sql/06_showcase_queries.sql</code></td></tr>
-            <tr><td><strong>EXISTS / NOT EXISTS</strong></td><td>Applications with all mandatory docs; missing-docs view</td><td><code>sql/04_views.sql, 06_showcase_queries.sql</code></td></tr>
-            <tr><td><strong>Transaction control</strong></td><td>Flask wraps submission in START TRANSACTION / COMMIT / ROLLBACK</td><td><code>app.py</code></td></tr>
-            <tr><td><strong>3NF Normalization</strong></td><td>All 14 tables – see comment block at top of schema</td><td><code>sql/01_schema.sql</code></td></tr>
-            <tr><td><strong>Indexes</strong></td><td>vin, passport_number, carnet_number, manufacturer_id, status</td><td><code>sql/01_schema.sql</code></td></tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-
-    <div class="card mb-4">
-      <div class="card-body">
-        <h5 class="fw-700">Carnet de Passages en Douane</h5>
-        <p>A <em>Carnet de Passages en Douane</em> (CPD) is an international customs document that allows a vehicle to be temporarily imported into a country without paying full import duties. It is issued by national automobile clubs and is recognised in over 100 countries that are members of the Alliance Internationale de Tourisme (AIT) or the Fédération Internationale de l'Automobile (FIA).</p>
-        <p>For temporary import into India, a valid CPD is mandatory. This system tracks CPD numbers, issuing countries, validity dates, and automatically sets the status to EXPIRED via a database trigger when the expiry date passes.</p>
-      </div>
-    </div>
-
-    <div class="alert alert-warning">
-      <i class="bi bi-exclamation-triangle-fill me-2"></i>
-      <strong>Disclaimer:</strong> This is an educational project only. The rules, fees, and procedures for vehicle import into India are subject to change. Always verify current requirements with official Indian authorities (DGFT, Customs, Ministry of Road Transport) before making any real import decision.
     </div>
   </div>
+
+  <div class="app-card mb-3">
+    <div class="app-card-header"><h3>Technology stack</h3></div>
+    <div class="app-card-body">
+      <div class="row g-3">
+        <div class="col-sm-6">
+          <div class="text-muted" style="font-size:.75rem;font-weight:600;text-transform:uppercase;letter-spacing:.06em;margin-bottom:.5rem;">Database</div>
+          <ul class="list-unstyled mb-0" style="font-size:.9rem;">
+            <li class="mb-1">MySQL 8.0 · InnoDB</li>
+            <li class="mb-1">14 tables in 3NF</li>
+            <li class="mb-1">Stored function + procedure</li>
+            <li class="mb-1">5 triggers · 5 views</li>
+          </ul>
+        </div>
+        <div class="col-sm-6">
+          <div class="text-muted" style="font-size:.75rem;font-weight:600;text-transform:uppercase;letter-spacing:.06em;margin-bottom:.5rem;">Application</div>
+          <ul class="list-unstyled mb-0" style="font-size:.9rem;">
+            <li class="mb-1">Python 3.11 · Flask</li>
+            <li class="mb-1">mysql-connector-python</li>
+            <li class="mb-1">Bootstrap 5 · IBM Plex Sans</li>
+            <li class="mb-1">Werkzeug password hashing</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="app-card mb-3">
+    <div class="app-card-header"><h3>SQL concepts demonstrated</h3></div>
+    <div class="app-card-body p-0">
+      <table class="table mb-0">
+        <thead><tr><th>Concept</th><th>Where used</th></tr></thead>
+        <tbody>
+          {% for concept, where in [
+            ('DDL — CREATE, DROP, ALTER', 'sql/01_schema.sql — 14 tables, indexes, foreign keys'),
+            ('Stored function', 'CalculateVehicleAge() — sql/02_functions_procedures.sql'),
+            ('Stored procedure', 'CheckEligibility() — cursor, CASE, SIGNAL'),
+            ('Cursor', 'Loop over active rules inside CheckEligibility'),
+            ('CASE expression', 'Operator evaluation inside procedure; age category in reports'),
+            ('SIGNAL', 'Raises an error if application is not found'),
+            ('Triggers (BEFORE / AFTER)', '5 triggers — sql/03_triggers.sql'),
+            ('Views', '5 views — sql/04_views.sql'),
+            ('INNER JOIN + LEFT JOIN', '6-table join on the application report'),
+            ('GROUP BY / HAVING', 'Applications per country, filter count > 2'),
+            ('Subquery', 'Vehicles older than the average manufacture year'),
+            ('EXISTS / NOT EXISTS', 'Applications missing mandatory documents'),
+            ('Transaction (COMMIT / ROLLBACK)', 'Flask wraps every submission in one transaction'),
+            ('Parameterised queries', 'All queries use %s placeholders — no string formatting'),
+            ('Indexes', '5 additional indexes on vin, passport, carnet, status'),
+            ('3NF normalisation', 'Justified in comment block at top of sql/01_schema.sql'),
+          ] %}
+          <tr>
+            <td><span class="concept-tag">{{ concept }}</span></td>
+            <td class="text-muted" style="font-size:.8125rem;">{{ where }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
 </div>
 {% endblock %}

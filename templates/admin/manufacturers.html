@@ -1,31 +1,47 @@
 {% extends "admin/base_admin.html" %}
-{% block title %}Manufacturers – Admin{% endblock %}
+{% block title %}Manufacturers — Admin{% endblock %}
 {% block page_title %}Manufacturers{% endblock %}
+
 {% block content %}
-<div class="card">
-  <div class="card-header d-flex justify-content-between align-items-center py-3">
-    <span class="fw-700"><i class="bi bi-building me-2"></i>Manufacturers</span>
-    <a href="{{ url_for('admin_manufacturer_add') }}" class="btn btn-primary btn-sm"><i class="bi bi-plus me-1"></i>Add</a>
+<div class="table-toolbar">
+  <input type="text" class="form-control search-box" placeholder="Search manufacturers…"
+         data-search-table="mfrTable" aria-label="Search">
+  <div class="ms-auto">
+    <a href="{{ url_for('admin_manufacturer_add') }}" class="btn btn-primary btn-sm">+ Add manufacturer</a>
   </div>
-  <div class="card-body p-0">
-    <table class="table table-hover mb-0">
-      <thead class="table-light"><tr><th>#</th><th>Name</th><th>Country</th><th>Actions</th></tr></thead>
-      <tbody>
-        {% for m in manufacturers %}
-        <tr>
-          <td>{{ m.manufacturer_id }}</td>
-          <td class="fw-600">{{ m.name }}</td>
-          <td>{{ m.country_name }}</td>
-          <td>
-            <a href="{{ url_for('admin_manufacturer_edit', mid=m.manufacturer_id) }}" class="btn btn-sm btn-outline-primary btn-action me-1"><i class="bi bi-pencil"></i></a>
-            <form method="POST" action="{{ url_for('admin_manufacturer_delete', mid=m.manufacturer_id) }}" class="d-inline" onsubmit="return confirm('Delete?')">
-              <button class="btn btn-sm btn-outline-danger btn-action"><i class="bi bi-trash"></i></button>
-            </form>
-          </td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
+</div>
+<div class="app-card">
+  <div class="app-card-body p-0">
+    {% if rows %}
+    <div class="table-scroll">
+      <table class="table mb-0" id="mfrTable">
+        <thead><tr><th>Name</th><th>Country</th><th>Website</th><th></th></tr></thead>
+        <tbody>
+          {% for r in rows %}
+          <tr>
+            <td class="fw-600">{{ r.name }}</td>
+            <td>{{ r.country_name }}</td>
+            <td>{% if r.website %}<a href="{{ r.website }}" target="_blank" rel="noopener" style="font-size:.8125rem;">{{ r.website }}</a>{% else %}—{% endif %}</td>
+            <td style="white-space:nowrap;">
+              <a href="{{ url_for('admin_manufacturer_edit', mid=r.manufacturer_id) }}" class="btn btn-secondary btn-sm">Edit</a>
+              <form method="POST" action="{{ url_for('admin_manufacturer_delete', mid=r.manufacturer_id) }}"
+                    class="d-inline" data-confirm="Delete manufacturer {{ r.name }}?">
+                <button type="submit" class="btn btn-outline-danger btn-sm">Delete</button>
+              </form>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div class="empty-state">
+      <div class="empty-state-icon">🏭</div>
+      <h4>No manufacturers yet</h4>
+      <p>Add the first manufacturer.</p>
+      <a href="{{ url_for('admin_manufacturer_add') }}" class="btn btn-primary btn-sm">Add manufacturer</a>
+    </div>
+    {% endif %}
   </div>
 </div>
 {% endblock %}

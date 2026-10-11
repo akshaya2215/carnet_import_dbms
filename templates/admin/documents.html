@@ -1,31 +1,45 @@
 {% extends "admin/base_admin.html" %}
-{% block title %}Documents – Admin{% endblock %}
+{% block title %}Documents — Admin{% endblock %}
 {% block page_title %}Documents{% endblock %}
+
 {% block content %}
-<div class="card">
-  <div class="card-header d-flex justify-content-between align-items-center py-3">
-    <span class="fw-700"><i class="bi bi-file-earmark me-2"></i>Documents</span>
-    <a href="{{ url_for('admin_document_add') }}" class="btn btn-primary btn-sm"><i class="bi bi-plus me-1"></i>Add</a>
+<div class="table-toolbar">
+  <div class="ms-auto">
+    <a href="{{ url_for('admin_document_add') }}" class="btn btn-primary btn-sm">+ Add document</a>
   </div>
-  <div class="card-body p-0">
-    <table class="table table-hover mb-0">
-      <thead class="table-light"><tr><th>#</th><th>Document Name</th><th>Mandatory</th><th>Actions</th></tr></thead>
-      <tbody>
-        {% for d in documents %}
-        <tr>
-          <td>{{ d.document_id }}</td>
-          <td class="fw-600">{{ d.document_name }}</td>
-          <td>{% if d.is_mandatory %}<span class="badge bg-danger">Yes</span>{% else %}<span class="badge bg-secondary">No</span>{% endif %}</td>
-          <td>
-            <a href="{{ url_for('admin_document_edit', did=d.document_id) }}" class="btn btn-sm btn-outline-primary btn-action me-1"><i class="bi bi-pencil"></i></a>
-            <form method="POST" action="{{ url_for('admin_document_delete', did=d.document_id) }}" class="d-inline" onsubmit="return confirm('Delete?')">
-              <button class="btn btn-sm btn-outline-danger btn-action"><i class="bi bi-trash"></i></button>
-            </form>
-          </td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
+</div>
+<div class="app-card">
+  <div class="app-card-body p-0">
+    {% if rows %}
+    <div class="table-scroll">
+      <table class="table mb-0">
+        <thead><tr><th>Document name</th><th>Mandatory</th><th>Description</th><th></th></tr></thead>
+        <tbody>
+          {% for r in rows %}
+          <tr>
+            <td class="fw-600">{{ r.document_name }}</td>
+            <td>{% if r.is_mandatory %}<span class="badge badge-rejected">Required</span>{% else %}<span class="badge badge-inactive">Optional</span>{% endif %}</td>
+            <td class="text-muted" style="font-size:.8125rem;">{{ r.description or '—' }}</td>
+            <td style="white-space:nowrap;">
+              <a href="{{ url_for('admin_document_edit', did=r.document_id) }}" class="btn btn-secondary btn-sm">Edit</a>
+              <form method="POST" action="{{ url_for('admin_document_delete', did=r.document_id) }}"
+                    class="d-inline" data-confirm="Delete document {{ r.document_name }}?">
+                <button type="submit" class="btn btn-outline-danger btn-sm">Delete</button>
+              </form>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div class="empty-state">
+      <div class="empty-state-icon">📑</div>
+      <h4>No documents defined</h4>
+      <p>Add the first document type.</p>
+      <a href="{{ url_for('admin_document_add') }}" class="btn btn-primary btn-sm">Add document</a>
+    </div>
+    {% endif %}
   </div>
 </div>
 {% endblock %}

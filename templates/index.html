@@ -1,115 +1,144 @@
 {% extends "base.html" %}
-{% block title %}Home – Indian Vehicle Import Eligibility{% endblock %}
+{% block title %}Vehicle Import Eligibility — India{% endblock %}
 
 {% block content %}
-<!-- Hero section -->
-<div class="rounded-4 text-white mb-4 p-5" style="background:linear-gradient(135deg,#1a56db 0%,#0f172a 100%);">
-  <div class="row align-items-center">
-    <div class="col-lg-7">
-      <h1 class="fw-800 display-5 mb-3">🇮🇳 Indian Vehicle Import<br>Eligibility System</h1>
-      <p class="lead mb-4 opacity-90">Find out instantly if your foreign vehicle qualifies for import into India. Our database evaluates every active rule — no guesswork, just facts.</p>
-      <a href="{{ url_for('check') }}" class="btn btn-warning btn-lg fw-600 me-2 px-4">
-        <i class="bi bi-car-front-fill me-2"></i>Check My Vehicle
-      </a>
-      <a href="{{ url_for('rules') }}" class="btn btn-outline-light btn-lg px-4">
-        <i class="bi bi-list-check me-2"></i>View Rules
-      </a>
-    </div>
-    <div class="col-lg-5 text-center mt-4 mt-lg-0">
-      <div style="font-size:8rem;line-height:1;">🚗</div>
-    </div>
-  </div>
-</div>
 
-<!-- Stats row -->
-<div class="row g-3 mb-4">
-  <div class="col-6 col-md-3">
-    <div class="stat-card text-center" style="background:linear-gradient(135deg,#dbeafe,#eff6ff);">
-      <div class="stat-number text-primary">{{ stats.total_apps }}</div>
-      <div class="text-muted small mt-1">Total Applications</div>
-    </div>
-  </div>
-  <div class="col-6 col-md-3">
-    <div class="stat-card text-center" style="background:linear-gradient(135deg,#d1fae5,#ecfdf5);">
-      <div class="stat-number text-success">{{ stats.eligible }}</div>
-      <div class="text-muted small mt-1">Eligible</div>
-    </div>
-  </div>
-  <div class="col-6 col-md-3">
-    <div class="stat-card text-center" style="background:linear-gradient(135deg,#fee2e2,#fef2f2);">
-      <div class="stat-number text-danger">{{ stats.rejected }}</div>
-      <div class="text-muted small mt-1">Rejected</div>
-    </div>
-  </div>
-  <div class="col-6 col-md-3">
-    <div class="stat-card text-center" style="background:linear-gradient(135deg,#fef3c7,#fffbeb);">
-      <div class="stat-number text-warning">{{ stats.active_rules }}</div>
-      <div class="text-muted small mt-1">Active Rules</div>
-    </div>
-  </div>
-</div>
-
-<!-- Recent applications + How it works -->
-<div class="row g-4">
+{# ── Hero ─────────────────────────────────────────────────── #}
+<div class="row align-items-start g-4 mb-5 mt-2">
   <div class="col-lg-7">
-    <div class="card h-100">
-      <div class="card-header bg-white border-0 pt-4 px-4">
-        <h5 class="fw-700 mb-0"><i class="bi bi-clock-history text-primary me-2"></i>Recent Applications</h5>
-      </div>
-      <div class="card-body p-0">
-        {% if recent %}
-        <div class="table-responsive">
-          <table class="table table-hover mb-0">
-            <thead><tr><th>#</th><th>Applicant</th><th>Vehicle</th><th>Type</th><th>Status</th></tr></thead>
-            <tbody>
-              {% for r in recent %}
-              <tr>
-                <td><a href="{{ url_for('result', application_id=r.application_id) }}" class="fw-600">#{{ r.application_id }}</a></td>
-                <td>{{ r.full_name }}</td>
-                <td>{{ r.model }}</td>
-                <td><span class="badge bg-secondary">{{ r.type_name.replace('_',' ') }}</span></td>
-                <td>
-                  {% if r.status == 'ELIGIBLE' %}<span class="badge-pass"><i class="bi bi-check-circle"></i> Eligible</span>
-                  {% elif r.status == 'REJECTED' %}<span class="badge-fail"><i class="bi bi-x-circle"></i> Rejected</span>
-                  {% else %}<span class="badge-pending">{{ r.status }}</span>{% endif %}
-                </td>
-              </tr>
-              {% endfor %}
-            </tbody>
-          </table>
-        </div>
-        {% else %}
-        <div class="text-center text-muted py-5">No applications yet. <a href="{{ url_for('check') }}">Submit the first one!</a></div>
-        {% endif %}
+    <p class="text-uppercase fw-600 mb-2" style="font-size:.75rem;letter-spacing:.1em;color:var(--c-saffron);">
+      India customs compliance tool
+    </p>
+    <h1 class="mb-3" style="max-width:20ch;">
+      Check whether a foreign vehicle can be imported into India
+    </h1>
+    <p class="text-muted mb-4" style="font-size:1rem;max-width:54ch;">
+      Enter vehicle and applicant details. The database evaluates every active eligibility rule and returns a per-rule report.
+    </p>
+    <a href="{{ url_for('check') }}" class="btn btn-primary px-4" style="font-size:.9375rem;">
+      Check a vehicle
+      <svg class="ms-2" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+    </a>
+    <a href="{{ url_for('rules') }}" class="btn btn-secondary ms-2 px-4" style="font-size:.9375rem;">View rules</a>
+
+    <div class="stat-bar mt-4 pt-3" style="border-top:var(--border);">
+      <div class="stat-item"><strong>{{ stats.active_rules }}</strong> rules in force</div>
+      <div class="stat-item"><strong>{{ stats.total_apps }}</strong> checks completed</div>
+      <div class="stat-item">
+        <strong style="color:var(--c-success);">{{ stats.eligible }}</strong> eligible &nbsp;·&nbsp;
+        <strong style="color:var(--c-danger);">{{ stats.rejected }}</strong> rejected
       </div>
     </div>
   </div>
 
   <div class="col-lg-5">
-    <div class="card h-100">
-      <div class="card-header bg-white border-0 pt-4 px-4">
-        <h5 class="fw-700 mb-0"><i class="bi bi-info-circle text-primary me-2"></i>How It Works</h5>
+    <div class="app-card" style="font-size:.9rem;">
+      <div class="app-card-header" style="background:var(--c-bg);">
+        <h3 style="font-size:.875rem;color:var(--c-muted);font-weight:600;text-transform:uppercase;letter-spacing:.05em;margin:0;">
+          Three import categories
+        </h3>
       </div>
-      <div class="card-body">
-        <div class="d-flex mb-3">
-          <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center me-3 flex-shrink-0" style="width:40px;height:40px;font-weight:700;">1</div>
-          <div><strong>Enter Vehicle Details</strong><br><small class="text-muted">Fill in the applicant info, vehicle specs, and any documents submitted.</small></div>
+      <div class="app-card-body" style="padding:.875rem 1rem;">
+        {% for it in import_types %}
+        <div class="import-type-card">
+          <div class="import-type-name">{{ it.type_name.replace('_', ' ').title() }}</div>
+          <div class="import-type-req">
+            {% if 'CARNET' in it.type_name %}Valid Carnet de Passages (CPD) required
+            {% elif 'PERMANENT' in it.type_name %}Max 3 years old · Right-hand drive · All docs
+            {% else %}Max 5 years old · Right-hand drive · All docs{% endif %}
+          </div>
         </div>
-        <div class="d-flex mb-3">
-          <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center me-3 flex-shrink-0" style="width:40px;height:40px;font-weight:700;">2</div>
-          <div><strong>Database Evaluates Rules</strong><br><small class="text-muted">A MySQL stored procedure checks every active rule: age, fuel type, steering side, carnet validity, documents.</small></div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</div>
+
+{# ── How it works ─────────────────────────────────────────── #}
+<div class="app-card mb-4">
+  <div class="app-card-header">
+    <h3>How the check works</h3>
+  </div>
+  <div class="app-card-body">
+    <div class="steps-row">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-text">
+          <strong>Enter details</strong>
+          Applicant passport, vehicle VIN, fuel type, year, import category and submitted documents.
         </div>
-        <div class="d-flex">
-          <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center me-3 flex-shrink-0" style="width:40px;height:40px;font-weight:700;">3</div>
-          <div><strong>See Detailed Results</strong><br><small class="text-muted">Get a PASS / FAIL per rule with the actual vs. expected value for every check.</small></div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-text">
+          <strong>Database evaluates rules</strong>
+          A MySQL stored procedure checks every active rule — age limit, drive side, fuel type, carnet validity, required documents.
         </div>
-        <hr>
-        <div class="alert alert-warning py-2 px-3 mb-0" style="font-size:.82rem;">
-          <i class="bi bi-exclamation-triangle me-1"></i>
-          <strong>Educational use only.</strong> Always verify with official Indian authorities.
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-text">
+          <strong>Review the report</strong>
+          Each rule gets a Pass or Fail with the actual vs expected value. One failed rule makes the vehicle ineligible.
         </div>
       </div>
     </div>
   </div>
 </div>
+
+{# ── Recent checks ────────────────────────────────────────── #}
+{% if recent %}
+<div class="app-card">
+  <div class="app-card-header">
+    <h3>Recent checks</h3>
+    <a href="{{ url_for('check') }}" class="btn btn-primary btn-sm">New check</a>
+  </div>
+  <div class="app-card-body p-0">
+    <div class="table-scroll">
+      <table class="table mb-0">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Applicant</th>
+            <th>Vehicle</th>
+            <th>Import type</th>
+            <th>Date</th>
+            <th>Outcome</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for r in recent %}
+          <tr>
+            <td><a href="{{ url_for('result', application_id=r.application_id) }}" class="fw-600">#{{ r.application_id }}</a></td>
+            <td>{{ r.full_name }}</td>
+            <td>{{ r.model }}</td>
+            <td><span class="badge badge-inactive">{{ r.type_name.replace('_',' ').title() }}</span></td>
+            <td class="text-muted">{{ r.application_date }}</td>
+            <td>
+              {% if r.status == 'ELIGIBLE' %}
+                <span class="badge badge-eligible">Eligible</span>
+              {% elif r.status == 'REJECTED' %}
+                <span class="badge badge-rejected">Rejected</span>
+              {% else %}
+                <span class="badge badge-pending">{{ r.status.title() }}</span>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% else %}
+<div class="app-card">
+  <div class="empty-state">
+    <div class="empty-state-icon">📋</div>
+    <h4>No checks yet</h4>
+    <p>Submit the first vehicle to see results here.</p>
+    <a href="{{ url_for('check') }}" class="btn btn-primary btn-sm">Check a vehicle</a>
+  </div>
+</div>
+{% endif %}
+
 {% endblock %}

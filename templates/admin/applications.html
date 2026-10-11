@@ -1,38 +1,43 @@
 {% extends "admin/base_admin.html" %}
-{% block title %}Applications – Admin{% endblock %}
+{% block title %}Applications — Admin{% endblock %}
 {% block page_title %}Applications{% endblock %}
+
 {% block content %}
-<div class="card">
-  <div class="card-header d-flex justify-content-between align-items-center py-3">
-    <span class="fw-700"><i class="bi bi-file-earmark-text me-2"></i>Import Applications</span>
-    <a href="{{ url_for('check') }}" class="btn btn-primary btn-sm" target="_blank"><i class="bi bi-plus me-1"></i>New Application</a>
-  </div>
-  <div class="card-body p-0">
-    <div class="table-responsive">
-      <table class="table table-hover mb-0">
-        <thead class="table-light">
-          <tr><th>#</th><th>Applicant</th><th>Vehicle</th><th>Type</th><th>Date</th><th>Status</th><th>Actions</th></tr>
+<div class="table-toolbar">
+  <input type="text" class="form-control search-box" placeholder="Search applications…"
+         data-search-table="appsTable" aria-label="Search">
+</div>
+
+<div class="app-card">
+  <div class="app-card-body p-0">
+    {% if rows %}
+    <div class="table-scroll">
+      <table class="table mb-0" id="appsTable">
+        <thead>
+          <tr>
+            <th>#</th><th>Applicant</th><th>Vehicle</th><th>Import type</th>
+            <th>Date</th><th>Status</th><th></th>
+          </tr>
         </thead>
         <tbody>
-          {% for a in applications %}
+          {% for r in rows %}
           <tr>
-            <td><a href="{{ url_for('result', application_id=a.application_id) }}" target="_blank">#{{ a.application_id }}</a></td>
-            <td>{{ a.full_name }}</td>
-            <td>{{ a.model }}</td>
-            <td><span class="badge bg-secondary">{{ a.type_name.replace('_',' ') }}</span></td>
-            <td class="text-muted small">{{ a.application_date }}</td>
+            <td class="fw-600">#{{ r.application_id }}</td>
+            <td>{{ r.full_name }}</td>
+            <td>{{ r.model }}</td>
+            <td><span class="badge badge-inactive" style="font-size:.65rem;">{{ r.type_name.replace('_',' ').title() }}</span></td>
+            <td class="text-muted">{{ r.application_date }}</td>
             <td>
-              {% if a.status == 'ELIGIBLE' %}<span class="badge-pass">ELIGIBLE</span>
-              {% elif a.status == 'REJECTED' %}<span class="badge-fail">REJECTED</span>
-              {% else %}<span class="badge bg-warning text-dark">{{ a.status }}</span>{% endif %}
+              {% if r.status == 'ELIGIBLE' %}<span class="badge badge-eligible">Eligible</span>
+              {% elif r.status == 'REJECTED' %}<span class="badge badge-rejected">Rejected</span>
+              {% else %}<span class="badge badge-pending">{{ r.status.title() }}</span>{% endif %}
             </td>
-            <td class="d-flex gap-1">
-              <form method="POST" action="{{ url_for('admin_application_rerun', app_id=a.application_id) }}" class="d-inline">
-                <button class="btn btn-sm btn-outline-success btn-action" title="Re-run eligibility"><i class="bi bi-arrow-repeat"></i></button>
-              </form>
-              <a href="{{ url_for('result', application_id=a.application_id) }}" class="btn btn-sm btn-outline-primary btn-action" target="_blank"><i class="bi bi-eye"></i></a>
-              <form method="POST" action="{{ url_for('admin_application_delete', app_id=a.application_id) }}" class="d-inline" onsubmit="return confirm('Delete application #{{ a.application_id }}?')">
-                <button class="btn btn-sm btn-outline-danger btn-action"><i class="bi bi-trash"></i></button>
+            <td style="white-space:nowrap;">
+              <a href="{{ url_for('result', application_id=r.application_id) }}" target="_blank"
+                 class="btn btn-secondary btn-sm">Report ↗</a>
+              <form method="POST" action="{{ url_for('admin_application_rerun', app_id=r.application_id) }}"
+                    class="d-inline" data-confirm="Re-run eligibility check for application #{{ r.application_id }}?">
+                <button type="submit" class="btn btn-primary btn-sm">Re-run</button>
               </form>
             </td>
           </tr>
@@ -40,6 +45,14 @@
         </tbody>
       </table>
     </div>
+    {% else %}
+    <div class="empty-state">
+      <div class="empty-state-icon">📋</div>
+      <h4>No applications yet</h4>
+      <p>Applications submitted via the public form will appear here.</p>
+      <a href="{{ url_for('check') }}" class="btn btn-primary btn-sm" target="_blank">Public check form ↗</a>
+    </div>
+    {% endif %}
   </div>
 </div>
 {% endblock %}

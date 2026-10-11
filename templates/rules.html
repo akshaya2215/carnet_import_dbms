@@ -1,41 +1,70 @@
 {% extends "base.html" %}
-{% block title %}Active Eligibility Rules{% endblock %}
+{% block title %}Eligibility rules — India Vehicle Import{% endblock %}
 
 {% block content %}
 <div class="mb-4">
-  <h1 class="fw-700"><i class="bi bi-list-check text-primary me-2"></i>Active Import Rules</h1>
-  <p class="text-muted">These are the rules currently in the database. Every import application is automatically evaluated against all active rules by the MySQL stored procedure.</p>
+  <h1 class="mb-1">Eligibility rules</h1>
+  <p class="text-muted" style="font-size:.9375rem;max-width:58ch;">
+    These rules are stored in the database and evaluated by a MySQL stored procedure for each application.
+    All active rules are shown below.
+  </p>
 </div>
 
-<div class="row g-3">
-  {% for rule in rules %}
-  <div class="col-md-6 col-lg-4">
-    <div class="card h-100 border-0" style="box-shadow:0 2px 12px rgba(0,0,0,0.07);">
-      <div class="card-body">
-        <div class="d-flex align-items-start justify-content-between mb-2">
-          <span class="badge bg-primary">{{ rule.rule_type.replace('_',' ') }}</span>
-          {% if rule.import_type %}<span class="badge bg-secondary">{{ rule.import_type.replace('_',' ') }}</span>
-          {% else %}<span class="badge bg-success">All Types</span>{% endif %}
-        </div>
-        <h6 class="fw-700 mt-2">{{ rule.rule_name }}</h6>
-        <p class="text-muted small mb-2">{{ rule.description or '' }}</p>
-        <div class="font-monospace bg-light rounded p-2 mb-2" style="font-size:.85rem;">
-          value <strong>{{ rule.operator }}</strong> <code>{{ rule.expected_value }}</code>
-        </div>
-        <div class="small text-muted">
-          <i class="bi bi-calendar3 me-1"></i>Effective: {{ rule.effective_date }}<br>
-          <i class="bi bi-clock me-1"></i>Updated: {{ rule.last_updated }}
-        </div>
-      </div>
-    </div>
-  </div>
-  {% endfor %}
-</div>
+{# Group rules by import type (None = all types) #}
+{% set type_groups = {} %}
+{% for rule in rules %}
+  {% set key = rule.import_type or 'All import categories' %}
+  {% if key not in type_groups %}{% set _ = type_groups.update({key: []}) %}{% endif %}
+  {% if type_groups[key].append(rule) %}{% endif %}
+{% endfor %}
 
 {% if not rules %}
-<div class="text-center py-5 text-muted">
-  <i class="bi bi-inbox" style="font-size:3rem;"></i>
-  <p class="mt-2">No active rules found.</p>
+<div class="app-card">
+  <div class="empty-state">
+    <div class="empty-state-icon">📋</div>
+    <h4>No active rules</h4>
+    <p>An admin can add rules in the admin panel.</p>
+  </div>
 </div>
+{% else %}
+
+{# Fall back to flat list because Jinja dict construction is limited #}
+{# We'll group by rendering distinct import_type headers #}
+{% set seen_types = [] %}
+{% for rule in rules %}
+  {% if rule.import_type not in seen_types %}
+    {% if seen_types %}
+    </tbody></table></div></div>
+    {% endif %}
+    <div class="app-card mb-3">
+      <div class="app-card-header">
+        <h3>{{ rule.import_type.replace('_',' ').title() if rule.import_type else 'All import categories' }}</h3>
+      </div>
+      <div class="app-card-body p-0">
+        <div class="table-scroll">
+        <table class="table mb-0">
+          <thead><tr>
+            <th>Rule</th>
+            <th>Check type</th>
+            <th>Requirement</th>
+            <th>Effective from</th>
+            <th>Last updated</th>
+          </tr></thead>
+          <tbody>
+    {% if seen_types.append(rule.import_type) %}{% endif %}
+  {% endif %}
+        <tr>
+          <td class="fw-600">{{ rule.rule_name }}</td>
+          <td><span class="badge badge-inactive" style="font-size:.65rem;text-transform:uppercase;letter-spacing:.03em;">{{ rule.rule_type.replace('_',' ') }}</span></td>
+          <td class="mono">{{ rule.operator }} {{ rule.expected_value }}</td>
+          <td class="text-muted">{{ rule.effective_date }}</td>
+          <td class="text-muted">{{ rule.last_updated }}</td>
+        </tr>
+{% endfor %}
+{% if rules %}
+        </tbody></table></div></div>
 {% endif %}
+
+{% endif %}
+
 {% endblock %}

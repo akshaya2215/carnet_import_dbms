@@ -1,28 +1,40 @@
 {% extends "admin/base_admin.html" %}
-{% block title %}{{ action }} Manufacturer – Admin{% endblock %}
+{% block title %}{{ action }} Manufacturer — Admin{% endblock %}
 {% block page_title %}{{ action }} Manufacturer{% endblock %}
 {% block content %}
-<div class="card" style="max-width:500px;">
-  <div class="card-header py-3">{{ action }} Manufacturer</div>
-  <div class="card-body">
-    <form method="POST">
-      <div class="mb-3">
-        <label class="form-label fw-600">Name *</label>
-        <input type="text" name="name" class="form-control" required value="{{ manufacturer.name if manufacturer else '' }}">
-      </div>
-      <div class="mb-3">
-        <label class="form-label fw-600">Country *</label>
-        <select name="country_id" class="form-select" required>
-          {% for c in countries %}
-          <option value="{{ c.country_id }}" {% if manufacturer and manufacturer.country_id==c.country_id %}selected{% endif %}>{{ c.country_name }}</option>
-          {% endfor %}
-        </select>
-      </div>
-      <div class="d-flex gap-2 justify-content-end">
-        <a href="{{ url_for('admin_manufacturers') }}" class="btn btn-secondary">Cancel</a>
-        <button class="btn btn-primary">{{ action }}</button>
-      </div>
-    </form>
+<div class="row justify-content-center">
+<div class="col-lg-6">
+  <div class="mb-3"><a href="{{ url_for('admin_manufacturers') }}" class="btn btn-secondary btn-sm">← Back</a></div>
+  <div class="app-card">
+    <div class="app-card-header"><h3>{{ action }} manufacturer</h3></div>
+    <div class="app-card-body">
+      <form method="POST">
+        <div class="mb-3">
+          <label class="form-label" for="mfr_name">Name</label>
+          <input type="text" name="name" id="mfr_name" class="form-control" required
+                 value="{{ manufacturer.name if manufacturer else '' }}">
+        </div>
+        <div class="mb-3">
+          <label class="form-label" for="country_id">Country</label>
+          <select name="country_id" id="country_id" class="form-select" required>
+            <option value="">Select…</option>
+            {% for c in countries %}
+            <option value="{{ c.country_id }}" {% if manufacturer and manufacturer.country_id==c.country_id %}selected{% endif %}>{{ c.country_name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="mb-4">
+          <label class="form-label" for="mfr_website">Website</label>
+          <input type="url" name="website" id="mfr_website" class="form-control"
+                 value="{{ manufacturer.website if manufacturer else '' }}" placeholder="https://…">
+        </div>
+        <div class="d-flex justify-content-end gap-2 pt-3" style="border-top:var(--border);">
+          <a href="{{ url_for('admin_manufacturers') }}" class="btn btn-secondary">Cancel</a>
+          <button type="submit" class="btn btn-primary">{{ action }} manufacturer</button>
+        </div>
+      </form>
+    </div>
   </div>
+</div>
 </div>
 {% endblock %}

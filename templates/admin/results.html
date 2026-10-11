@@ -1,33 +1,46 @@
 {% extends "admin/base_admin.html" %}
-{% block title %}Results – Admin{% endblock %}
-{% block page_title %}Eligibility Results{% endblock %}
+{% block title %}Results — Admin{% endblock %}
+{% block page_title %}Eligibility results{% endblock %}
+
 {% block content %}
-<div class="card">
-  <div class="card-header py-3 fw-700"><i class="bi bi-clipboard-check me-2"></i>All Eligibility Results</div>
-  <div class="card-body p-0">
-    <div class="table-responsive">
-      <table class="table table-hover mb-0">
-        <thead class="table-light">
-          <tr><th>Result#</th><th>App#</th><th>Applicant</th><th>Vehicle</th><th>Evaluated</th><th>Result</th><th>Detail</th></tr>
+<div class="table-toolbar">
+  <input type="text" class="form-control search-box" placeholder="Search results…"
+         data-search-table="resultsTable" aria-label="Search">
+</div>
+<div class="app-card">
+  <div class="app-card-body p-0">
+    {% if rows %}
+    <div class="table-scroll">
+      <table class="table mb-0" id="resultsTable">
+        <thead>
+          <tr><th>Result #</th><th>Application</th><th>Applicant</th><th>Vehicle</th><th>Evaluated</th><th>Outcome</th><th></th></tr>
         </thead>
         <tbody>
-          {% for r in results %}
+          {% for r in rows %}
           <tr>
-            <td>#{{ r.result_id }}</td>
-            <td><a href="{{ url_for('result', application_id=r.application_id) }}" target="_blank">#{{ r.application_id }}</a></td>
+            <td>{{ r.result_id }}</td>
+            <td class="fw-600">#{{ r.application_id }}</td>
             <td>{{ r.full_name }}</td>
             <td>{{ r.model }}</td>
-            <td class="small text-muted">{{ r.evaluation_date }}</td>
+            <td class="text-muted">{{ r.evaluation_date }}</td>
             <td>
-              {% if r.overall_result=='PASSED' %}<span class="badge-pass">PASSED</span>
-              {% else %}<span class="badge-fail">FAILED</span>{% endif %}
+              {% if r.overall_result == 'PASSED' %}<span class="badge badge-eligible">Eligible</span>
+              {% else %}<span class="badge badge-rejected">Rejected</span>{% endif %}
             </td>
-            <td><a href="{{ url_for('admin_result_detail', result_id=r.result_id) }}" class="btn btn-sm btn-outline-primary btn-action"><i class="bi bi-search"></i></a></td>
+            <td><a href="{{ url_for('result', application_id=r.application_id) }}" target="_blank"
+                   class="btn btn-secondary btn-sm">View ↗</a></td>
           </tr>
           {% endfor %}
         </tbody>
       </table>
     </div>
+    {% else %}
+    <div class="empty-state">
+      <div class="empty-state-icon">📊</div>
+      <h4>No results yet</h4>
+      <p>Results are generated when a check is submitted via the public form.</p>
+    </div>
+    {% endif %}
   </div>
 </div>
 {% endblock %}

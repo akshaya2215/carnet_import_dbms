@@ -1,4 +1,4 @@
-﻿# app.py
+# app.py
 # -----------------------------------------------------------------------
 # Main Flask application for the Indian Vehicle Import Eligibility &
 # Carnet Management System.
@@ -132,7 +132,8 @@ def index():
         JOIN import_type it ON it.import_type_id = ia.import_type_id
         ORDER BY ia.application_id DESC LIMIT 5
     """)
-    return render_template("index.html", stats=stats, recent=recent)
+    import_types = database.query("SELECT import_type_id, type_name FROM import_type ORDER BY import_type_id")
+    return render_template("index.html", stats=stats, recent=recent, import_types=import_types)
 
 
 @app.route("/check", methods=["GET", "POST"])
@@ -406,16 +407,28 @@ def admin_dashboard():
             (SELECT COUNT(*) FROM vehicle)                               AS total_vehicles,
             (SELECT COUNT(*) FROM applicant)                             AS total_applicants
     """)[0]
-    recent_results = database.query("""
-        SELECT er.result_id, er.evaluation_date, er.overall_result,
-               ia.application_id, ap.full_name, v.model
-        FROM eligibility_result er
-        JOIN import_application ia ON ia.application_id = er.application_id
-        JOIN applicant ap ON ap.applicant_id = ia.applicant_id
-        JOIN vehicle   v  ON v.vehicle_id    = ia.vehicle_id
-        ORDER BY er.result_id DESC LIMIT 8
+    stats_extra = database.query("""
+        SELECT COUNT(*) AS active_carnets FROM carnet WHERE status='ACTIVE'
+    """)[0]
+    stats['active_carnets'] = stats_extra['active_carnets']
+
+    by_type = database.query("""
+        SELECT it.type_name, COUNT(*) AS cnt
+        FROM import_application ia
+        JOIN import_type it ON it.import_type_id = ia.import_type_id
+        GROUP BY it.type_name ORDER BY cnt DESC
     """)
-    return render_template("admin/dashboard.html", stats=stats, recent_results=recent_results)
+    recent = database.query("""
+        SELECT ia.application_id, ia.application_date, ia.status,
+               ap.full_name, v.model, it.type_name
+        FROM import_application ia
+        JOIN applicant   ap ON ap.applicant_id   = ia.applicant_id
+        JOIN vehicle     v  ON v.vehicle_id      = ia.vehicle_id
+        JOIN import_type it ON it.import_type_id = ia.import_type_id
+        ORDER BY ia.application_id DESC LIMIT 8
+    """)
+    return render_template("admin/dashboard.html", stats=stats, recent=recent,
+                           by_type=by_type, recent_results=[])
 
 
 # ---- Helper: paginate list queries ----

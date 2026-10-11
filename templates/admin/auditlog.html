@@ -1,29 +1,59 @@
 {% extends "admin/base_admin.html" %}
-{% block title %}Audit Log – Admin{% endblock %}
-{% block page_title %}Rule Audit Log{% endblock %}
+{% block title %}Audit Log — Admin{% endblock %}
+{% block page_title %}Rule audit log{% endblock %}
+
 {% block content %}
-<div class="card">
-  <div class="card-header py-3 fw-700"><i class="bi bi-journal-text me-2"></i>Rule Audit Log (Last 100)</div>
-  <div class="card-body p-0">
-    <div class="table-responsive">
-      <table class="table table-hover mb-0">
-        <thead class="table-light"><tr><th>#</th><th>Rule</th><th>Action</th><th>Old Value</th><th>New Value</th><th>Old Active</th><th>New Active</th><th>Changed At</th></tr></thead>
-        <tbody>
-          {% for l in logs %}
+
+<div class="app-card">
+  <div class="app-card-header">
+    <h3>Rule change history</h3>
+    <button class="btn btn-secondary btn-sm btn-export-csv" data-table="auditTable">Export CSV</button>
+  </div>
+  <div class="app-card-body p-0">
+    {% if rows %}
+    <div class="table-scroll">
+      <table class="table mb-0" id="auditTable">
+        <thead>
           <tr>
-            <td>{{ l.log_id }}</td>
-            <td>{{ l.rule_name or ('Rule #'+l.rule_id|string) }}</td>
-            <td><span class="badge {% if l.action=='INSERT' %}bg-success{% else %}bg-warning text-dark{% endif %}">{{ l.action }}</span></td>
-            <td class="font-monospace small">{{ l.old_expected_value or '—' }}</td>
-            <td class="font-monospace small">{{ l.new_expected_value or '—' }}</td>
-            <td>{{ '✓' if l.old_is_active else ('✗' if l.old_is_active is not none else '—') }}</td>
-            <td>{{ '✓' if l.new_is_active else '✗' }}</td>
-            <td class="small text-muted">{{ l.changed_at }}</td>
+            <th>#</th>
+            <th>Rule</th>
+            <th>Action</th>
+            <th>Changed by</th>
+            <th>Changed at</th>
+            <th>Previous value</th>
+            <th>New value</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for r in rows %}
+          <tr>
+            <td>{{ r.log_id }}</td>
+            <td class="fw-600">{{ r.rule_name }}</td>
+            <td>
+              {% if r.action == 'INSERT' %}<span class="badge badge-active">Created</span>
+              {% elif r.action == 'UPDATE' %}<span class="badge badge-pending">Updated</span>
+              {% else %}<span class="badge badge-rejected">{{ r.action }}</span>{% endif %}
+            </td>
+            <td>{{ r.changed_by or 'system' }}</td>
+            <td class="text-muted">{{ r.changed_at }}</td>
+            <td class="mono" style="font-size:.8rem;max-width:22ch;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="{{ r.old_values }}">
+              {{ r.old_values or '—' }}
+            </td>
+            <td class="mono" style="font-size:.8rem;max-width:22ch;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="{{ r.new_values }}">
+              {{ r.new_values or '—' }}
+            </td>
           </tr>
           {% endfor %}
         </tbody>
       </table>
     </div>
+    {% else %}
+    <div class="empty-state">
+      <div class="empty-state-icon">📋</div>
+      <h4>No audit entries</h4>
+      <p>The trigger writes an entry whenever a rule is created or modified.</p>
+    </div>
+    {% endif %}
   </div>
 </div>
 {% endblock %}

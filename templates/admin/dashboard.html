@@ -1,100 +1,198 @@
 {% extends "admin/base_admin.html" %}
-{% block title %}Dashboard – Admin{% endblock %}
-{% block page_title %}Dashboard{% endblock %}
+{% block title %}Dashboard — Admin{% endblock %}
+{% block page_title %}Overview{% endblock %}
 
 {% block content %}
-<!-- Stat cards -->
+
+{# ── KPI tiles ────────────────────────────────────────────── #}
 <div class="row g-3 mb-4">
-  <div class="col-6 col-md-3">
-    <div class="stat-card" style="background:linear-gradient(135deg,#dbeafe,#eff6ff);">
-      <div class="stat-number text-primary">{{ stats.total_apps }}</div>
-      <div class="text-muted small mt-1">Total Applications</div>
+  {% set kpis = [
+    ('Total applications', stats.total_apps, ''),
+    ('Eligible', stats.eligible, 'var(--c-success)'),
+    ('Rejected', stats.rejected, 'var(--c-danger)'),
+    ('Pending', stats.pending, 'var(--c-warning)'),
+    ('Expired carnets', stats.expired_carnets, 'var(--c-muted)'),
+  ] %}
+  {% for label, value, color in kpis %}
+  <div class="col-6 col-md-4 col-lg">
+    <div class="kpi-tile">
+      <div class="kpi-tile-value" {% if color %}style="color:{{ color }};"{% endif %}>{{ value }}</div>
+      <div class="kpi-tile-label">{{ label }}</div>
     </div>
   </div>
-  <div class="col-6 col-md-3">
-    <div class="stat-card" style="background:linear-gradient(135deg,#d1fae5,#ecfdf5);">
-      <div class="stat-number text-success">{{ stats.eligible }}</div>
-      <div class="text-muted small mt-1">Eligible</div>
+  {% endfor %}
+</div>
+
+{# ── Charts + recent ──────────────────────────────────────── #}
+<div class="row g-3 mb-4">
+  <div class="col-lg-4 col-md-6">
+    <div class="app-card h-100">
+      <div class="app-card-header"><h3>Outcome breakdown</h3></div>
+      <div class="app-card-body" style="display:flex;flex-direction:column;align-items:center;">
+        <canvas id="outcomeChart" width="200" height="200" style="max-width:200px;"></canvas>
+        <div class="mt-3 w-100">
+          {% set total = (stats.eligible + stats.rejected)|int or 1 %}
+          <div class="mini-bar-row">
+            <span class="mini-bar-label" style="color:var(--c-success);">Eligible</span>
+            <div class="mini-bar-track"><div class="mini-bar-fill" style="width:{{ (stats.eligible/total*100)|round|int }}%;background:var(--c-success);"></div></div>
+            <span class="mini-bar-count">{{ stats.eligible }}</span>
+          </div>
+          <div class="mini-bar-row">
+            <span class="mini-bar-label" style="color:var(--c-danger);">Rejected</span>
+            <div class="mini-bar-track"><div class="mini-bar-fill" style="width:{{ (stats.rejected/total*100)|round|int }}%;background:var(--c-danger);"></div></div>
+            <span class="mini-bar-count">{{ stats.rejected }}</span>
+          </div>
+          {% if stats.pending %}
+          <div class="mini-bar-row">
+            <span class="mini-bar-label" style="color:var(--c-warning);">Pending</span>
+            <div class="mini-bar-track"><div class="mini-bar-fill" style="width:{{ (stats.pending/(stats.total_apps or 1)*100)|round|int }}%;background:var(--c-warning);"></div></div>
+            <span class="mini-bar-count">{{ stats.pending }}</span>
+          </div>
+          {% endif %}
+        </div>
+      </div>
     </div>
   </div>
-  <div class="col-6 col-md-3">
-    <div class="stat-card" style="background:linear-gradient(135deg,#fee2e2,#fef2f2);">
-      <div class="stat-number text-danger">{{ stats.rejected }}</div>
-      <div class="text-muted small mt-1">Rejected</div>
+
+  <div class="col-lg-4 col-md-6">
+    <div class="app-card h-100">
+      <div class="app-card-header"><h3>By import type</h3></div>
+      <div class="app-card-body" style="display:flex;flex-direction:column;align-items:center;">
+        <canvas id="typeChart" width="200" height="200" style="max-width:200px;"></canvas>
+        <div class="mt-3 w-100">
+          {% for row in by_type %}
+          <div class="mini-bar-row">
+            <span class="mini-bar-label" style="font-size:.75rem;">{{ row.type_name.replace('_',' ')[:12] }}</span>
+            <div class="mini-bar-track">
+              <div class="mini-bar-fill" style="width:{{ (row.cnt/(stats.total_apps or 1)*100)|round|int }}%;background:var(--c-info);"></div>
+            </div>
+            <span class="mini-bar-count">{{ row.cnt }}</span>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
     </div>
   </div>
-  <div class="col-6 col-md-3">
-    <div class="stat-card" style="background:linear-gradient(135deg,#fef3c7,#fffbeb);">
-      <div class="stat-number text-warning">{{ stats.pending }}</div>
-      <div class="text-muted small mt-1">Pending / Under Review</div>
-    </div>
-  </div>
-  <div class="col-6 col-md-3">
-    <div class="stat-card" style="background:linear-gradient(135deg,#fce7f3,#fdf2f8);">
-      <div class="stat-number text-danger">{{ stats.expired_carnets }}</div>
-      <div class="text-muted small mt-1">Expired Carnets</div>
-    </div>
-  </div>
-  <div class="col-6 col-md-3">
-    <div class="stat-card" style="background:linear-gradient(135deg,#fef3c7,#fffbeb);">
-      <div class="stat-number text-warning">{{ stats.expiring_soon }}</div>
-      <div class="text-muted small mt-1">Carnets Expiring (30d)</div>
-    </div>
-  </div>
-  <div class="col-6 col-md-3">
-    <div class="stat-card" style="background:linear-gradient(135deg,#e0e7ff,#eef2ff);">
-      <div class="stat-number text-indigo" style="color:#4338ca;">{{ stats.active_rules }}</div>
-      <div class="text-muted small mt-1">Active Rules</div>
-    </div>
-  </div>
-  <div class="col-6 col-md-3">
-    <div class="stat-card" style="background:linear-gradient(135deg,#f0fdf4,#dcfce7);">
-      <div class="stat-number" style="color:#16a34a;">{{ stats.total_vehicles }}</div>
-      <div class="text-muted small mt-1">Total Vehicles</div>
+
+  <div class="col-lg-4">
+    <div class="app-card h-100">
+      <div class="app-card-header"><h3>Quick stats</h3></div>
+      <div class="app-card-body">
+        <div class="def-list" style="gap:.5rem;">
+          <dt>Active rules</dt>
+          <dd>{{ stats.active_rules }}</dd>
+          <dt>Total vehicles</dt>
+          <dd>{{ stats.total_vehicles }}</dd>
+          <dt>Total applicants</dt>
+          <dd>{{ stats.total_applicants }}</dd>
+          <dt>Active carnets</dt>
+          <dd>{{ stats.active_carnets }}</dd>
+          <dt>Expired carnets</dt>
+          <dd style="color:var(--c-danger);">{{ stats.expired_carnets }}</dd>
+        </div>
+        <div class="mt-3 d-flex gap-2 flex-wrap">
+          <a href="{{ url_for('admin_applications') }}" class="btn btn-primary btn-sm">Applications</a>
+          <a href="{{ url_for('admin_rules') }}" class="btn btn-secondary btn-sm">Rules</a>
+        </div>
+      </div>
     </div>
   </div>
 </div>
 
-<!-- Quick actions -->
-<div class="card mb-4">
-  <div class="card-header bg-white border-0 pt-3 px-4">
-    <h6 class="fw-700 mb-0">Quick Actions</h6>
+{# ── Recent applications ───────────────────────────────────── #}
+<div class="app-card">
+  <div class="app-card-header">
+    <h3>Recent applications</h3>
+    <a href="{{ url_for('admin_applications') }}" class="btn btn-secondary btn-sm">View all</a>
   </div>
-  <div class="card-body d-flex flex-wrap gap-2 pt-0">
-    <a href="{{ url_for('check') }}" class="btn btn-primary btn-sm"><i class="bi bi-plus-circle me-1"></i>New Application</a>
-    <a href="{{ url_for('admin_vehicles') }}" class="btn btn-outline-secondary btn-sm"><i class="bi bi-car-front me-1"></i>Vehicles</a>
-    <a href="{{ url_for('admin_rules') }}" class="btn btn-outline-secondary btn-sm"><i class="bi bi-list-check me-1"></i>Rules</a>
-    <a href="{{ url_for('admin_carnets') }}" class="btn btn-outline-secondary btn-sm"><i class="bi bi-card-text me-1"></i>Carnets</a>
-    <a href="{{ url_for('admin_reports') }}" class="btn btn-outline-secondary btn-sm"><i class="bi bi-bar-chart me-1"></i>Reports</a>
-  </div>
-</div>
-
-<!-- Recent results -->
-<div class="card">
-  <div class="card-header bg-dark text-white py-3">
-    <h6 class="fw-700 mb-0"><i class="bi bi-clock-history me-2"></i>Recent Eligibility Results</h6>
-  </div>
-  <div class="card-body p-0">
-    <div class="table-responsive">
-      <table class="table table-hover mb-0">
-        <thead class="table-light"><tr><th>Result ID</th><th>App #</th><th>Applicant</th><th>Vehicle</th><th>Date</th><th>Result</th></tr></thead>
-        <tbody>
-          {% for r in recent_results %}
+  <div class="app-card-body p-0">
+    {% if recent %}
+    <div class="table-scroll">
+      <table class="table mb-0">
+        <thead>
           <tr>
-            <td><a href="{{ url_for('admin_result_detail', result_id=r.result_id) }}">#{{ r.result_id }}</a></td>
-            <td><a href="{{ url_for('result', application_id=r.application_id) }}">#{{ r.application_id }}</a></td>
+            <th>#</th>
+            <th>Applicant</th>
+            <th>Vehicle</th>
+            <th>Import type</th>
+            <th>Date</th>
+            <th>Status</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for r in recent %}
+          <tr>
+            <td><span class="fw-600">#{{ r.application_id }}</span></td>
             <td>{{ r.full_name }}</td>
             <td>{{ r.model }}</td>
-            <td class="text-muted small">{{ r.evaluation_date }}</td>
+            <td><span class="badge badge-inactive" style="font-size:.65rem;">{{ r.type_name.replace('_',' ').title() }}</span></td>
+            <td class="text-muted">{{ r.application_date }}</td>
             <td>
-              {% if r.overall_result == 'PASSED' %}<span class="badge-pass">PASSED</span>
-              {% else %}<span class="badge-fail">FAILED</span>{% endif %}
+              {% if r.status == 'ELIGIBLE' %}
+                <span class="badge badge-eligible">Eligible</span>
+              {% elif r.status == 'REJECTED' %}
+                <span class="badge badge-rejected">Rejected</span>
+              {% else %}
+                <span class="badge badge-pending">{{ r.status.title() }}</span>
+              {% endif %}
             </td>
+            <td><a href="{{ url_for('result', application_id=r.application_id) }}" class="btn btn-secondary btn-sm" target="_blank">Report</a></td>
           </tr>
           {% endfor %}
         </tbody>
       </table>
     </div>
+    {% else %}
+    <div class="empty-state">
+      <div class="empty-state-icon">📋</div>
+      <h4>No applications yet</h4>
+      <p>Applications submitted through the public form will appear here.</p>
+    </div>
+    {% endif %}
   </div>
 </div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function() {
+  const eligible = {{ stats.eligible }};
+  const rejected = {{ stats.rejected }};
+  const pending  = {{ stats.pending }};
+
+  const byType = {{ by_type | tojson }};
+
+  const chartDefaults = {
+    type: 'doughnut',
+    options: {
+      plugins: { legend: { display: false } },
+      cutout: '65%',
+      responsive: true,
+      maintainAspectRatio: true,
+    }
+  };
+
+  new Chart(document.getElementById('outcomeChart'), {
+    ...chartDefaults,
+    data: {
+      labels: ['Eligible', 'Rejected', 'Pending'],
+      datasets: [{ data: [eligible, rejected, pending],
+        backgroundColor: ['#1E7B4F','#B42318','#B54708'],
+        borderWidth: 2, borderColor: '#fff' }]
+    }
+  });
+
+  new Chart(document.getElementById('typeChart'), {
+    ...chartDefaults,
+    data: {
+      labels: byType.map(r => r.type_name.replace(/_/g,' ')),
+      datasets: [{ data: byType.map(r => r.cnt),
+        backgroundColor: ['#1D5FA8','#E08A00','#2B3445'],
+        borderWidth: 2, borderColor: '#fff' }]
+    }
+  });
+})();
+</script>
 {% endblock %}

@@ -1,35 +1,56 @@
 {% extends "admin/base_admin.html" %}
-{% block title %}Vehicles – Admin{% endblock %}
+{% block title %}Vehicles — Admin{% endblock %}
 {% block page_title %}Vehicles{% endblock %}
 
 {% block content %}
-<div class="card">
-  <div class="card-header d-flex justify-content-between align-items-center py-3">
-    <span class="fw-700"><i class="bi bi-car-front me-2"></i>All Vehicles</span>
-    <a href="{{ url_for('admin_vehicle_add') }}" class="btn btn-primary btn-sm"><i class="bi bi-plus me-1"></i>Add Vehicle</a>
+<div class="table-toolbar">
+  <input type="text" class="form-control search-box" placeholder="Search vehicles…"
+         data-search-table="vehicleTable" id="vehicleSearch" aria-label="Search vehicles">
+  <div class="ms-auto">
+    <a href="{{ url_for('admin_vehicle_add') }}" class="btn btn-primary btn-sm">+ Add vehicle</a>
   </div>
-  <div class="card-body p-0">
-    <div class="table-responsive">
-      <table class="table table-hover mb-0">
-        <thead class="table-light">
-          <tr><th>#</th><th>VIN</th><th>Model</th><th>Manufacturer</th><th>Year</th><th>Fuel</th><th>CC</th><th>Steering</th><th>Origin</th><th>Actions</th></tr>
+</div>
+
+<div class="app-card">
+  <div class="app-card-body p-0">
+    {% if rows %}
+    <div class="table-scroll">
+      <table class="table mb-0" id="vehicleTable">
+        <thead>
+          <tr>
+            <th>VIN</th>
+            <th>Manufacturer</th>
+            <th>Model</th>
+            <th class="text-end">Year</th>
+            <th>Fuel</th>
+            <th class="text-end">Engine (cc)</th>
+            <th>Steering</th>
+            <th>Origin</th>
+            <th></th>
+          </tr>
         </thead>
         <tbody>
-          {% for v in vehicles %}
+          {% for r in rows %}
           <tr>
-            <td>{{ v.vehicle_id }}</td>
-            <td class="font-monospace small">{{ v.vin }}</td>
-            <td class="fw-600">{{ v.model }}</td>
-            <td>{{ v.manufacturer }}</td>
-            <td>{{ v.manufacture_year }}</td>
-            <td><span class="badge bg-secondary">{{ v.fuel_type }}</span></td>
-            <td>{{ v.engine_cc }}</td>
-            <td>{{ v.steering_side }}</td>
-            <td>{{ v.origin_country }}</td>
+            <td class="mono">{{ r.vin }}</td>
+            <td>{{ r.manufacturer }}</td>
+            <td class="fw-600">{{ r.model }}</td>
+            <td class="text-end">{{ r.manufacture_year }}</td>
+            <td><span class="badge badge-inactive">{{ r.fuel_type }}</span></td>
+            <td class="text-end">{{ r.engine_cc or '—' }}</td>
             <td>
-              <a href="{{ url_for('admin_vehicle_edit', vid=v.vehicle_id) }}" class="btn btn-sm btn-outline-primary btn-action me-1"><i class="bi bi-pencil"></i></a>
-              <form method="POST" action="{{ url_for('admin_vehicle_delete', vid=v.vehicle_id) }}" class="d-inline" onsubmit="return confirm('Delete this vehicle?')">
-                <button class="btn btn-sm btn-outline-danger btn-action"><i class="bi bi-trash"></i></button>
+              {% if r.steering_side == 'RIGHT' %}
+                <span class="badge badge-eligible">Right</span>
+              {% else %}
+                <span class="badge badge-rejected">Left</span>
+              {% endif %}
+            </td>
+            <td>{{ r.origin_country }}</td>
+            <td style="white-space:nowrap;">
+              <a href="{{ url_for('admin_vehicle_edit', vid=r.vehicle_id) }}" class="btn btn-secondary btn-sm">Edit</a>
+              <form method="POST" action="{{ url_for('admin_vehicle_delete', vid=r.vehicle_id) }}"
+                    class="d-inline" data-confirm="Delete vehicle {{ r.vin }}?">
+                <button type="submit" class="btn btn-outline-danger btn-sm">Delete</button>
               </form>
             </td>
           </tr>
@@ -37,6 +58,14 @@
         </tbody>
       </table>
     </div>
+    {% else %}
+    <div class="empty-state">
+      <div class="empty-state-icon">🚗</div>
+      <h4>No vehicles yet</h4>
+      <p>Add the first vehicle to get started.</p>
+      <a href="{{ url_for('admin_vehicle_add') }}" class="btn btn-primary btn-sm">Add vehicle</a>
+    </div>
+    {% endif %}
   </div>
 </div>
 {% endblock %}
