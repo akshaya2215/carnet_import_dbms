@@ -1,0 +1,33 @@
+{% extends "admin/base_admin.html" %}
+{% block title %}{{ action }} Country – Admin{% endblock %}
+{% block page_title %}{{ action }} Country{% endblock %}
+{% block content %}
+<div class="card" style="max-width:500px;">
+  <div class="card-header py-3">{{ action }} Country</div>
+  <div class="card-body">
+    <form method="POST">
+      <div class="mb-3">
+        <label class="form-label fw-600">Country Name *</label>
+        <input type="text" name="country_name" class="form-control" required value="{{ country.country_name if country else '' }}">
+      </div>
+      <div class="mb-3">
+        <label class="form-label fw-600">Driving Side *</label>
+        <select name="driving_side" class="form-select" required>
+          <option value="LEFT" {% if country and country.driving_side=='LEFT' %}selected{% endif %}>LEFT</option>
+          <option value="RIGHT" {% if country and country.driving_side=='RIGHT' %}selected{% endif %}>RIGHT</option>
+        </select>
+      </div>
+      <div class="mb-4">
+        <div class="form-check">
+          <input type="checkbox" name="is_carnet_member" id="is_carnet_member" class="form-check-input" {% if not country or country.is_carnet_member %}checked{% endif %}>
+          <label class="form-check-label" for="is_carnet_member">Carnet Member</label>
+        </div>
+      </div>
+      <div class="d-flex gap-2 justify-content-end">
+        <a href="{{ url_for('admin_countries') }}" class="btn btn-secondary">Cancel</a>
+        <button class="btn btn-primary">{{ action }}</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

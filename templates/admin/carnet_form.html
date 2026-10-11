@@ -1,0 +1,48 @@
+{% extends "admin/base_admin.html" %}
+{% block title %}{{ action }} Carnet – Admin{% endblock %}
+{% block page_title %}{{ action }} Carnet{% endblock %}
+{% block content %}
+<div class="card" style="max-width:550px;">
+  <div class="card-header py-3">{{ action }} Carnet</div>
+  <div class="card-body">
+    <form method="POST">
+      <div class="row g-3">
+        <div class="col-12">
+          <label class="form-label fw-600">Carnet Number *</label>
+          <input type="text" name="carnet_number" class="form-control" required value="{{ carnet.carnet_number if carnet else '' }}">
+        </div>
+        <div class="col-12">
+          <label class="form-label fw-600">Issuing Country *</label>
+          <select name="issuing_country_id" class="form-select" required>
+            {% for c in countries %}
+            <option value="{{ c.country_id }}" {% if carnet and carnet.issuing_country_id==c.country_id %}selected{% endif %}>{{ c.country_name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label fw-600">Issue Date *</label>
+          <input type="date" name="issue_date" class="form-control" required value="{{ carnet.issue_date if carnet else '' }}">
+        </div>
+        <div class="col-md-6">
+          <label class="form-label fw-600">Expiry Date *</label>
+          <input type="date" name="expiry_date" class="form-control" required value="{{ carnet.expiry_date if carnet else '' }}">
+        </div>
+        {% if carnet %}
+        <div class="col-12">
+          <label class="form-label fw-600">Status</label>
+          <select name="status" class="form-select">
+            <option {% if carnet.status=='ACTIVE' %}selected{% endif %}>ACTIVE</option>
+            <option {% if carnet.status=='EXPIRED' %}selected{% endif %}>EXPIRED</option>
+            <option {% if carnet.status=='CANCELLED' %}selected{% endif %}>CANCELLED</option>
+          </select>
+        </div>
+        {% endif %}
+        <div class="col-12 d-flex gap-2 justify-content-end">
+          <a href="{{ url_for('admin_carnets') }}" class="btn btn-secondary">Cancel</a>
+          <button class="btn btn-primary">{{ action }}</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

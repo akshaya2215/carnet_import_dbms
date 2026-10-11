@@ -1,0 +1,304 @@
+{% extends "admin/base_admin.html" %}
+{% block title %}Reports – Admin{% endblock %}
+{% block page_title %}SQL Reports{% endblock %}
+
+{% block content %}
+
+<!-- SQL Concepts Legend -->
+<div class="card mb-4">
+  <div class="card-header py-3 bg-dark text-white fw-700"><i class="bi bi-code-square me-2"></i>SQL Concepts Demonstrated</div>
+  <div class="card-body">
+    <div class="row g-2">
+      {% for concept, file in [
+        ('JOIN (INNER + LEFT)', 'sql/06_showcase_queries.sql + app.py'),
+        ('GROUP BY / HAVING', 'sql/06_showcase_queries.sql'),
+        ('SUBQUERY (correlated)', 'sql/06_showcase_queries.sql'),
+        ('EXISTS / NOT EXISTS', 'sql/04_views.sql + 06_showcase_queries.sql'),
+        ('CASE expression', 'sql/02_functions_procedures.sql + 06_showcase_queries.sql'),
+        ('Stored Procedure', 'sql/02_functions_procedures.sql – CheckEligibility()'),
+        ('Stored Function', 'sql/02_functions_procedures.sql – CalculateVehicleAge()'),
+        ('Triggers', 'sql/03_triggers.sql – 5 triggers'),
+        ('Views', 'sql/04_views.sql – 5 views'),
+        ('Transactions', 'app.py – START TRANSACTION / COMMIT / ROLLBACK'),
+        ('3NF Normalization', 'sql/01_schema.sql – comment block'),
+        ('Indexes', 'sql/01_schema.sql – 5 additional indexes'),
+      ] %}
+      <div class="col-md-6">
+        <div class="d-flex align-items-center gap-2 p-2 border rounded-2">
+          <span class="badge bg-primary">{{ concept }}</span>
+          <small class="text-muted">{{ file }}</small>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+
+<!-- JOIN Report -->
+<div class="card mb-4">
+  <div class="card-header py-3">
+    <div class="section-concept mb-0">SQL Concept: <strong>JOIN</strong> – Applications joined with Applicant, Vehicle, Manufacturer, Country (6-table JOIN)</div>
+  </div>
+  <div class="card-body p-0">
+    <div class="table-responsive">
+      <table class="table table-hover table-sm mb-0">
+        <thead class="table-light"><tr><th>#</th><th>Applicant</th><th>Vehicle</th><th>Year</th><th>Manufacturer</th><th>Country</th><th>Type</th><th>Status</th></tr></thead>
+        <tbody>
+          {% for r in join_data %}
+          <tr>
+            <td><a href="{{ url_for('result', application_id=r.application_id) }}" target="_blank">#{{ r.application_id }}</a></td>
+            <td>{{ r.applicant }}</td>
+            <td>{{ r.model }}</td>
+            <td>{{ r.manufacture_year }}</td>
+            <td>{{ r.manufacturer }}</td>
+            <td>{{ r.origin_country }}</td>
+            <td><span class="badge bg-secondary small">{{ r.import_type.replace('_',' ') }}</span></td>
+            <td>
+              {% if r.status=='ELIGIBLE' %}<span class="badge-pass">ELIGIBLE</span>
+              {% elif r.status=='REJECTED' %}<span class="badge-fail">REJECTED</span>
+              {% else %}<span class="badge bg-warning text-dark small">{{ r.status }}</span>{% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- GROUP BY / HAVING -->
+<div class="card mb-4">
+  <div class="card-header py-3">
+    <div class="section-concept mb-0">SQL Concept: <strong>GROUP BY / HAVING</strong> – Applications per origin country</div>
+  </div>
+  <div class="card-body p-0">
+    <table class="table table-hover mb-0">
+      <thead class="table-light"><tr><th>Country</th><th>Total Applications</th><th>Bar</th></tr></thead>
+      <tbody>
+        {% set max_count = groupby_data[0].total_applications if groupby_data else 1 %}
+        {% for r in groupby_data %}
+        <tr>
+          <td class="fw-600">{{ r.country_name }}</td>
+          <td>{{ r.total_applications }}</td>
+          <td style="width:200px;">
+            <div class="progress" style="height:12px;">
+              <div class="progress-bar bg-primary" style="width:{{ (r.total_applications / max_count * 100)|int }}%"></div>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- SUBQUERY -->
+<div class="card mb-4">
+  <div class="card-header py-3">
+    <div class="section-concept mb-0">SQL Concept: <strong>SUBQUERY</strong> – Vehicles older than the average manufacture year</div>
+  </div>
+  <div class="card-body p-0">
+    <table class="table table-hover mb-0">
+      <thead class="table-light"><tr><th>VIN</th><th>Model</th><th>Manufacturer</th><th>Year</th><th>Age (yrs)</th></tr></thead>
+      <tbody>
+        {% for r in subquery_data %}
+        <tr>
+          <td class="font-monospace small">{{ r.vin }}</td>
+          <td class="fw-600">{{ r.model }}</td>
+          <td>{{ r.manufacturer }}</td>
+          <td>{{ r.manufacture_year }}</td>
+          <td><span class="badge bg-danger">{{ r.age_years }}</span></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- EXISTS -->
+<div class="card mb-4">
+  <div class="card-header py-3">
+    <div class="section-concept mb-0">SQL Concept: <strong>EXISTS</strong> – Applications where ALL mandatory documents were submitted</div>
+  </div>
+  <div class="card-body p-0">
+    <table class="table table-hover mb-0">
+      <thead class="table-light"><tr><th>App#</th><th>Applicant</th><th>Import Type</th><th>Status</th></tr></thead>
+      <tbody>
+        {% for r in exists_data %}
+        <tr>
+          <td>#{{ r.application_id }}</td>
+          <td class="fw-600">{{ r.applicant }}</td>
+          <td>{{ r.import_type.replace('_',' ') }}</td>
+          <td>
+            {% if r.status=='ELIGIBLE' %}<span class="badge-pass">ELIGIBLE</span>
+            {% elif r.status=='REJECTED' %}<span class="badge-fail">REJECTED</span>
+            {% else %}<span class="badge bg-warning text-dark">{{ r.status }}</span>{% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- CASE -->
+<div class="card mb-4">
+  <div class="card-header py-3">
+    <div class="section-concept mb-0">SQL Concept: <strong>CASE</strong> – Vehicle age category (NEW/MID/OLD) and human-readable status</div>
+  </div>
+  <div class="card-body p-0">
+    <table class="table table-hover mb-0">
+      <thead class="table-light"><tr><th>App#</th><th>Vehicle</th><th>Year</th><th>Age</th><th>Category</th><th>Status</th></tr></thead>
+      <tbody>
+        {% for r in case_data %}
+        <tr>
+          <td>#{{ r.application_id }}</td>
+          <td class="fw-600">{{ r.model }}</td>
+          <td>{{ r.manufacture_year }}</td>
+          <td>{{ r.age_years }} yrs</td>
+          <td>
+            <span class="badge {% if r.age_category=='NEW' %}bg-success{% elif r.age_category=='MID' %}bg-warning text-dark{% else %}bg-danger{% endif %}">
+              {{ r.age_category }}
+            </span>
+          </td>
+          <td class="small">{{ r.status_label }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Most failed rules -->
+<div class="card mb-4">
+  <div class="card-header py-3 fw-700"><i class="bi bi-exclamation-triangle text-danger me-2"></i>Most Frequently Failed Rules</div>
+  <div class="card-body p-0">
+    <table class="table table-hover mb-0">
+      <thead class="table-light"><tr><th>Rule</th><th>Type</th><th>Fail Count</th></tr></thead>
+      <tbody>
+        {% for r in failed_rules %}
+        <tr>
+          <td class="fw-600">{{ r.rule_name }}</td>
+          <td><span class="badge bg-primary">{{ r.rule_type }}</span></td>
+          <td><span class="badge bg-danger">{{ r.fail_count }}</span></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- By manufacturer & by type -->
+<div class="row g-4 mb-4">
+  <div class="col-md-6">
+    <div class="card h-100">
+      <div class="card-header fw-700 py-3">Applications by Manufacturer</div>
+      <div class="card-body p-0">
+        <table class="table table-hover mb-0">
+          <thead class="table-light"><tr><th>Manufacturer</th><th>Total</th><th class="text-success">Eligible</th><th class="text-danger">Rejected</th></tr></thead>
+          <tbody>
+            {% for r in by_manufacturer %}
+            <tr>
+              <td class="fw-600">{{ r.manufacturer }}</td>
+              <td>{{ r.applications }}</td>
+              <td class="text-success">{{ r.eligible }}</td>
+              <td class="text-danger">{{ r.rejected }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-6">
+    <div class="card h-100">
+      <div class="card-header fw-700 py-3">Applications by Import Type</div>
+      <div class="card-body p-0">
+        <table class="table table-hover mb-0">
+          <thead class="table-light"><tr><th>Type</th><th>Total</th><th class="text-success">Eligible</th><th class="text-danger">Rejected</th><th>Pending</th></tr></thead>
+          <tbody>
+            {% for r in by_type %}
+            <tr>
+              <td class="fw-600">{{ r.type_name.replace('_',' ') }}</td>
+              <td>{{ r.total }}</td>
+              <td class="text-success">{{ r.eligible }}</td>
+              <td class="text-danger">{{ r.rejected }}</td>
+              <td class="text-warning">{{ r.pending }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Expired carnets & expiring soon -->
+<div class="row g-4 mb-4">
+  <div class="col-md-6">
+    <div class="card h-100">
+      <div class="card-header fw-700 py-3"><i class="bi bi-x-circle text-danger me-2"></i>Expired Carnets</div>
+      <div class="card-body p-0">
+        <table class="table table-hover mb-0">
+          <thead class="table-light"><tr><th>Carnet No.</th><th>Issuing Country</th><th>Expired On</th></tr></thead>
+          <tbody>
+            {% for r in expired_carnets %}
+            <tr>
+              <td class="font-monospace">{{ r.carnet_number }}</td>
+              <td>{{ r.issuing_country }}</td>
+              <td class="text-danger">{{ r.expiry_date }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-6">
+    <div class="card h-100">
+      <div class="card-header fw-700 py-3"><i class="bi bi-clock-history text-warning me-2"></i>Carnets Expiring Soon (30 days) <small class="text-muted">[from view]</small></div>
+      <div class="card-body p-0">
+        <table class="table table-hover mb-0">
+          <thead class="table-light"><tr><th>Carnet No.</th><th>Country</th><th>Expires</th><th>Days Left</th></tr></thead>
+          <tbody>
+            {% for r in expiring_soon %}
+            <tr>
+              <td class="font-monospace">{{ r.carnet_number }}</td>
+              <td>{{ r.issuing_country }}</td>
+              <td>{{ r.expiry_date }}</td>
+              <td><span class="badge {% if r.days_left <= 7 %}bg-danger{% else %}bg-warning text-dark{% endif %}">{{ r.days_left }}d</span></td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Missing documents from view -->
+<div class="card mb-4">
+  <div class="card-header fw-700 py-3"><i class="bi bi-file-x text-warning me-2"></i>Applications with Missing Mandatory Documents <small class="text-muted">[from view: v_applications_missing_documents]</small></div>
+  <div class="card-body p-0">
+    {% if missing_docs %}
+    <table class="table table-hover mb-0">
+      <thead class="table-light"><tr><th>App#</th><th>Applicant</th><th>Passport</th><th>Vehicle</th><th>Status</th></tr></thead>
+      <tbody>
+        {% for r in missing_docs %}
+        <tr>
+          <td>#{{ r.application_id }}</td>
+          <td class="fw-600">{{ r.applicant_name }}</td>
+          <td class="font-monospace">{{ r.passport_number }}</td>
+          <td>{{ r.vehicle_model }}</td>
+          <td><span class="badge bg-warning text-dark">{{ r.status }}</span></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <div class="text-center text-muted py-4"><i class="bi bi-check-circle text-success me-2"></i>All applications have complete mandatory documents.</div>
+    {% endif %}
+  </div>
+</div>
+
+{% endblock %}

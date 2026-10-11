@@ -1,0 +1,66 @@
+{% extends "admin/base_admin.html" %}
+{% block title %}{{ action }} Rule – Admin{% endblock %}
+{% block page_title %}{{ action }} Rule{% endblock %}
+{% block content %}
+<div class="card" style="max-width:650px;">
+  <div class="card-header py-3">{{ action }} Eligibility Rule</div>
+  <div class="card-body">
+    <form method="POST">
+      <div class="row g-3">
+        <div class="col-12">
+          <label class="form-label fw-600">Rule Name *</label>
+          <input type="text" name="rule_name" class="form-control" required value="{{ rule.rule_name if rule else '' }}">
+        </div>
+        <div class="col-md-6">
+          <label class="form-label fw-600">Rule Type *</label>
+          <select name="rule_type" class="form-select" required>
+            {% for rt in ['VEHICLE_AGE','DRIVING_SIDE','FUEL_TYPE','ENGINE_CC','CARNET_VALID','DOCUMENT_REQUIRED'] %}
+            <option {% if rule and rule.rule_type==rt %}selected{% endif %}>{{ rt }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="col-md-3">
+          <label class="form-label fw-600">Operator *</label>
+          <select name="operator" class="form-select" required>
+            {% for op in ['=','!=','<','<=','>','>=','IN'] %}
+            <option {% if rule and rule.operator==op %}selected{% endif %}>{{ op }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="col-md-3">
+          <label class="form-label fw-600">Expected Value *</label>
+          <input type="text" name="expected_value" class="form-control" required value="{{ rule.expected_value if rule else '' }}" placeholder="e.g. 3, RIGHT, YES">
+        </div>
+        <div class="col-md-6">
+          <label class="form-label fw-600">Import Type</label>
+          <select name="import_type_id" class="form-select">
+            <option value="">All Types (NULL)</option>
+            {% for it in import_types %}
+            <option value="{{ it.import_type_id }}" {% if rule and rule.import_type_id==it.import_type_id %}selected{% endif %}>{{ it.type_name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label fw-600">Effective Date *</label>
+          <input type="date" name="effective_date" class="form-control" required value="{{ rule.effective_date if rule else '' }}">
+        </div>
+        <div class="col-12">
+          <label class="form-label fw-600">Description</label>
+          <input type="text" name="description" class="form-control" value="{{ rule.description if rule else '' }}" maxlength="255">
+        </div>
+        <div class="col-12">
+          <div class="form-check">
+            <input type="checkbox" name="is_active" id="is_active" class="form-check-input"
+              {% if not rule or rule.is_active %}checked{% endif %}>
+            <label class="form-check-label" for="is_active">Rule is Active</label>
+          </div>
+        </div>
+        <div class="col-12 d-flex gap-2 justify-content-end">
+          <a href="{{ url_for('admin_rules') }}" class="btn btn-secondary">Cancel</a>
+          <button class="btn btn-primary">{{ action }} Rule</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

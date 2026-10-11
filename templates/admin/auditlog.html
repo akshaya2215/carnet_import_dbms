@@ -1,0 +1,29 @@
+{% extends "admin/base_admin.html" %}
+{% block title %}Audit Log – Admin{% endblock %}
+{% block page_title %}Rule Audit Log{% endblock %}
+{% block content %}
+<div class="card">
+  <div class="card-header py-3 fw-700"><i class="bi bi-journal-text me-2"></i>Rule Audit Log (Last 100)</div>
+  <div class="card-body p-0">
+    <div class="table-responsive">
+      <table class="table table-hover mb-0">
+        <thead class="table-light"><tr><th>#</th><th>Rule</th><th>Action</th><th>Old Value</th><th>New Value</th><th>Old Active</th><th>New Active</th><th>Changed At</th></tr></thead>
+        <tbody>
+          {% for l in logs %}
+          <tr>
+            <td>{{ l.log_id }}</td>
+            <td>{{ l.rule_name or ('Rule #'+l.rule_id|string) }}</td>
+            <td><span class="badge {% if l.action=='INSERT' %}bg-success{% else %}bg-warning text-dark{% endif %}">{{ l.action }}</span></td>
+            <td class="font-monospace small">{{ l.old_expected_value or '—' }}</td>
+            <td class="font-monospace small">{{ l.new_expected_value or '—' }}</td>
+            <td>{{ '✓' if l.old_is_active else ('✗' if l.old_is_active is not none else '—') }}</td>
+            <td>{{ '✓' if l.new_is_active else '✗' }}</td>
+            <td class="small text-muted">{{ l.changed_at }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

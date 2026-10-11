@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% block title %}About – Indian Vehicle Import System{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-lg-9">
+    <h1 class="fw-700 mb-4"><i class="bi bi-info-circle text-primary me-2"></i>About This Project</h1>
+
+    <div class="card mb-4">
+      <div class="card-body">
+        <h5 class="fw-700">Project Overview</h5>
+        <p>The <strong>Indian Vehicle Import Eligibility &amp; Carnet Management System</strong> is a university DBMS project demonstrating advanced MySQL features. The <em>database</em> — not the Python code — makes all eligibility decisions through a stored procedure, triggers, and views.</p>
+        <p>It covers:</p>
+        <ul>
+          <li>Carnet de Passages en Douane management</li>
+          <li>Rule-based eligibility checking (vehicle age, fuel type, steering side, engine CC, carnet validity, document submission)</li>
+          <li>Full audit trail via triggers</li>
+          <li>Admin CRUD interface with role-based access</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- SQL Concepts Demonstrated -->
+    <div class="card mb-4">
+      <div class="card-header bg-dark text-white py-3">
+        <h5 class="mb-0"><i class="bi bi-code-square me-2"></i>SQL Concepts Demonstrated</h5>
+      </div>
+      <div class="card-body p-0">
+        <table class="table mb-0">
+          <thead class="table-light"><tr><th>Concept</th><th>Where Used</th><th>File</th></tr></thead>
+          <tbody>
+            <tr><td><strong>DDL – CREATE / DROP</strong></td><td>14 tables, indexes, FKs</td><td><code>sql/01_schema.sql</code></td></tr>
+            <tr><td><strong>Stored Function</strong></td><td>CalculateVehicleAge()</td><td><code>sql/02_functions_procedures.sql</code></td></tr>
+            <tr><td><strong>Stored Procedure</strong></td><td>CheckEligibility() – cursor loop, CASE, SIGNAL</td><td><code>sql/02_functions_procedures.sql</code></td></tr>
+            <tr><td><strong>Cursor</strong></td><td>Iterates active rules inside CheckEligibility</td><td><code>sql/02_functions_procedures.sql</code></td></tr>
+            <tr><td><strong>CASE expression</strong></td><td>Rule operator evaluation inside procedure; reports</td><td><code>sql/02_functions_procedures.sql, 06_showcase_queries.sql</code></td></tr>
+            <tr><td><strong>Triggers (5)</strong></td><td>Carnet auto-expiry, rule audit log, UNDER_REVIEW</td><td><code>sql/03_triggers.sql</code></td></tr>
+            <tr><td><strong>Views (5)</strong></td><td>Eligible vehicles, active carnets, pending apps, missing docs, expiring carnets</td><td><code>sql/04_views.sql</code></td></tr>
+            <tr><td><strong>JOIN (INNER + LEFT)</strong></td><td>Application report joining 6 tables</td><td><code>sql/06_showcase_queries.sql, app.py</code></td></tr>
+            <tr><td><strong>GROUP BY / HAVING</strong></td><td>Applications per country, countries with &gt;2 apps</td><td><code>sql/06_showcase_queries.sql</code></td></tr>
+            <tr><td><strong>Subquery</strong></td><td>Vehicles older than average age</td><td><code>sql/06_showcase_queries.sql</code></td></tr>
+            <tr><td><strong>EXISTS / NOT EXISTS</strong></td><td>Applications with all mandatory docs; missing-docs view</td><td><code>sql/04_views.sql, 06_showcase_queries.sql</code></td></tr>
+            <tr><td><strong>Transaction control</strong></td><td>Flask wraps submission in START TRANSACTION / COMMIT / ROLLBACK</td><td><code>app.py</code></td></tr>
+            <tr><td><strong>3NF Normalization</strong></td><td>All 14 tables – see comment block at top of schema</td><td><code>sql/01_schema.sql</code></td></tr>
+            <tr><td><strong>Indexes</strong></td><td>vin, passport_number, carnet_number, manufacturer_id, status</td><td><code>sql/01_schema.sql</code></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="card mb-4">
+      <div class="card-body">
+        <h5 class="fw-700">Carnet de Passages en Douane</h5>
+        <p>A <em>Carnet de Passages en Douane</em> (CPD) is an international customs document that allows a vehicle to be temporarily imported into a country without paying full import duties. It is issued by national automobile clubs and is recognised in over 100 countries that are members of the Alliance Internationale de Tourisme (AIT) or the Fédération Internationale de l'Automobile (FIA).</p>
+        <p>For temporary import into India, a valid CPD is mandatory. This system tracks CPD numbers, issuing countries, validity dates, and automatically sets the status to EXPIRED via a database trigger when the expiry date passes.</p>
+      </div>
+    </div>
+
+    <div class="alert alert-warning">
+      <i class="bi bi-exclamation-triangle-fill me-2"></i>
+      <strong>Disclaimer:</strong> This is an educational project only. The rules, fees, and procedures for vehicle import into India are subject to change. Always verify current requirements with official Indian authorities (DGFT, Customs, Ministry of Road Transport) before making any real import decision.
+    </div>
+  </div>
+</div>
+{% endblock %}

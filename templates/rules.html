@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}Active Eligibility Rules{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+  <h1 class="fw-700"><i class="bi bi-list-check text-primary me-2"></i>Active Import Rules</h1>
+  <p class="text-muted">These are the rules currently in the database. Every import application is automatically evaluated against all active rules by the MySQL stored procedure.</p>
+</div>
+
+<div class="row g-3">
+  {% for rule in rules %}
+  <div class="col-md-6 col-lg-4">
+    <div class="card h-100 border-0" style="box-shadow:0 2px 12px rgba(0,0,0,0.07);">
+      <div class="card-body">
+        <div class="d-flex align-items-start justify-content-between mb-2">
+          <span class="badge bg-primary">{{ rule.rule_type.replace('_',' ') }}</span>
+          {% if rule.import_type %}<span class="badge bg-secondary">{{ rule.import_type.replace('_',' ') }}</span>
+          {% else %}<span class="badge bg-success">All Types</span>{% endif %}
+        </div>
+        <h6 class="fw-700 mt-2">{{ rule.rule_name }}</h6>
+        <p class="text-muted small mb-2">{{ rule.description or '' }}</p>
+        <div class="font-monospace bg-light rounded p-2 mb-2" style="font-size:.85rem;">
+          value <strong>{{ rule.operator }}</strong> <code>{{ rule.expected_value }}</code>
+        </div>
+        <div class="small text-muted">
+          <i class="bi bi-calendar3 me-1"></i>Effective: {{ rule.effective_date }}<br>
+          <i class="bi bi-clock me-1"></i>Updated: {{ rule.last_updated }}
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+{% if not rules %}
+<div class="text-center py-5 text-muted">
+  <i class="bi bi-inbox" style="font-size:3rem;"></i>
+  <p class="mt-2">No active rules found.</p>
+</div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,28 @@
+{% extends "admin/base_admin.html" %}
+{% block title %}{{ action }} Manufacturer – Admin{% endblock %}
+{% block page_title %}{{ action }} Manufacturer{% endblock %}
+{% block content %}
+<div class="card" style="max-width:500px;">
+  <div class="card-header py-3">{{ action }} Manufacturer</div>
+  <div class="card-body">
+    <form method="POST">
+      <div class="mb-3">
+        <label class="form-label fw-600">Name *</label>
+        <input type="text" name="name" class="form-control" required value="{{ manufacturer.name if manufacturer else '' }}">
+      </div>
+      <div class="mb-3">
+        <label class="form-label fw-600">Country *</label>
+        <select name="country_id" class="form-select" required>
+          {% for c in countries %}
+          <option value="{{ c.country_id }}" {% if manufacturer and manufacturer.country_id==c.country_id %}selected{% endif %}>{{ c.country_name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="d-flex gap-2 justify-content-end">
+        <a href="{{ url_for('admin_manufacturers') }}" class="btn btn-secondary">Cancel</a>
+        <button class="btn btn-primary">{{ action }}</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

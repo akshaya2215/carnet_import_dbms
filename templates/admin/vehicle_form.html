@@ -1,0 +1,66 @@
+{% extends "admin/base_admin.html" %}
+{% block title %}{{ action }} Vehicle – Admin{% endblock %}
+{% block page_title %}{{ action }} Vehicle{% endblock %}
+
+{% block content %}
+<div class="card" style="max-width:700px;">
+  <div class="card-header py-3"><i class="bi bi-car-front me-2"></i>{{ action }} Vehicle</div>
+  <div class="card-body">
+    <form method="POST">
+      <div class="row g-3">
+        <div class="col-md-6">
+          <label class="form-label fw-600">VIN *</label>
+          <input type="text" name="vin" class="form-control text-uppercase" required maxlength="50" value="{{ vehicle.vin if vehicle else '' }}">
+        </div>
+        <div class="col-md-6">
+          <label class="form-label fw-600">Model *</label>
+          <input type="text" name="model" class="form-control" required value="{{ vehicle.model if vehicle else '' }}">
+        </div>
+        <div class="col-md-6">
+          <label class="form-label fw-600">Manufacturer *</label>
+          <select name="manufacturer_id" class="form-select" required>
+            {% for m in manufacturers %}
+            <option value="{{ m.manufacturer_id }}" {% if vehicle and vehicle.manufacturer_id==m.manufacturer_id %}selected{% endif %}>{{ m.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label fw-600">Origin Country *</label>
+          <select name="origin_country_id" class="form-select" required>
+            {% for c in countries %}
+            <option value="{{ c.country_id }}" {% if vehicle and vehicle.origin_country_id==c.country_id %}selected{% endif %}>{{ c.country_name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="col-md-3">
+          <label class="form-label fw-600">Year *</label>
+          <input type="number" name="manufacture_year" class="form-control" required min="1900" max="2030" value="{{ vehicle.manufacture_year if vehicle else '' }}">
+        </div>
+        <div class="col-md-3">
+          <label class="form-label fw-600">Fuel Type *</label>
+          <select name="fuel_type" class="form-select" required>
+            {% for f in ['PETROL','DIESEL','ELECTRIC','HYBRID','CNG'] %}
+            <option {% if vehicle and vehicle.fuel_type==f %}selected{% endif %}>{{ f }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="col-md-3">
+          <label class="form-label fw-600">Engine CC</label>
+          <input type="number" name="engine_cc" class="form-control" min="0" value="{{ vehicle.engine_cc if vehicle else '0' }}">
+        </div>
+        <div class="col-md-3">
+          <label class="form-label fw-600">Steering *</label>
+          <select name="steering_side" class="form-select" required>
+            <option value="RIGHT" {% if vehicle and vehicle.steering_side=='RIGHT' %}selected{% endif %}>RIGHT</option>
+            <option value="LEFT" {% if vehicle and vehicle.steering_side=='LEFT' %}selected{% endif %}>LEFT</option>
+          </select>
+        </div>
+        <div class="col-12 d-flex gap-2 justify-content-end">
+          <a href="{{ url_for('admin_vehicles') }}" class="btn btn-secondary">Cancel</a>
+          <button type="submit" class="btn btn-primary fw-600">{{ action }} Vehicle</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

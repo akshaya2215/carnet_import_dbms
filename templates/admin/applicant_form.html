@@ -1,0 +1,38 @@
+{% extends "admin/base_admin.html" %}
+{% block title %}{{ action }} Applicant – Admin{% endblock %}
+{% block page_title %}{{ action }} Applicant{% endblock %}
+{% block content %}
+<div class="card" style="max-width:600px;">
+  <div class="card-header py-3">{{ action }} Applicant</div>
+  <div class="card-body">
+    <form method="POST">
+      <div class="row g-3">
+        <div class="col-md-6">
+          <label class="form-label fw-600">Full Name *</label>
+          <input type="text" name="full_name" class="form-control" required value="{{ applicant.full_name if applicant else '' }}">
+        </div>
+        <div class="col-md-6">
+          <label class="form-label fw-600">Passport Number *</label>
+          <input type="text" name="passport_number" class="form-control" required value="{{ applicant.passport_number if applicant else '' }}">
+        </div>
+        <div class="col-md-4">
+          <label class="form-label fw-600">Phone</label>
+          <input type="text" name="phone" class="form-control" value="{{ applicant.phone if applicant else '' }}">
+        </div>
+        <div class="col-md-8">
+          <label class="form-label fw-600">Email</label>
+          <input type="email" name="email" class="form-control" value="{{ applicant.email if applicant else '' }}">
+        </div>
+        <div class="col-12">
+          <label class="form-label fw-600">Address</label>
+          <input type="text" name="address" class="form-control" value="{{ applicant.address if applicant else '' }}">
+        </div>
+        <div class="col-12 d-flex gap-2 justify-content-end">
+          <a href="{{ url_for('admin_applicants') }}" class="btn btn-secondary">Cancel</a>
+          <button class="btn btn-primary">{{ action }}</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
