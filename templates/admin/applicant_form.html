@@ -1,38 +1,62 @@
 {% extends "admin/base_admin.html" %}
-{% block title %}{{ action }} Applicant – Admin{% endblock %}
+
+{% block title %}{{ action }} Applicant — Customs Admin{% endblock %}
 {% block page_title %}{{ action }} Applicant{% endblock %}
+
 {% block content %}
-<div class="card" style="max-width:600px;">
-  <div class="card-header py-3">{{ action }} Applicant</div>
-  <div class="card-body">
-    <form method="POST">
-      <div class="row g-3">
-        <div class="col-md-6">
-          <label class="form-label fw-600">Full Name *</label>
-          <input type="text" name="full_name" class="form-control" required value="{{ applicant.full_name if applicant else '' }}">
-        </div>
-        <div class="col-md-6">
-          <label class="form-label fw-600">Passport Number *</label>
-          <input type="text" name="passport_number" class="form-control" required value="{{ applicant.passport_number if applicant else '' }}">
-        </div>
-        <div class="col-md-4">
-          <label class="form-label fw-600">Phone</label>
-          <input type="text" name="phone" class="form-control" value="{{ applicant.phone if applicant else '' }}">
-        </div>
-        <div class="col-md-8">
-          <label class="form-label fw-600">Email</label>
-          <input type="email" name="email" class="form-control" value="{{ applicant.email if applicant else '' }}">
-        </div>
-        <div class="col-12">
-          <label class="form-label fw-600">Address</label>
-          <input type="text" name="address" class="form-control" value="{{ applicant.address if applicant else '' }}">
-        </div>
-        <div class="col-12 d-flex gap-2 justify-content-end">
-          <a href="{{ url_for('admin_applicants') }}" class="btn btn-secondary">Cancel</a>
-          <button class="btn btn-primary">{{ action }}</button>
-        </div>
+<div class="row justify-content-center">
+  <div class="col-lg-7">
+    <div class="mb-3">
+      <a href="{{ url_for('admin_applicants') }}" class="btn btn-secondary btn-sm">
+        ← Back to applicants register
+      </a>
+    </div>
+
+    <div class="app-card">
+      <div class="app-card-header">
+        <h3>{{ action }} applicant record</h3>
       </div>
-    </form>
+      <div class="app-card-body">
+        <form method="POST" novalidate>
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label" for="full_name">Full official name <span class="text-danger">*</span></label>
+              <input type="text" name="full_name" id="full_name" class="form-control" required
+                     value="{{ applicant.full_name if applicant else '' }}" placeholder="As printed on passport">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label" for="passport_number">Passport number <span class="text-danger">*</span></label>
+              <input type="text" name="passport_number" id="passport_number" class="form-control mono text-uppercase" required
+                     value="{{ applicant.passport_number if applicant else '' }}" placeholder="e.g. Z9876543">
+            </div>
+            <div class="col-md-4">
+              <label class="form-label" for="phone">Telephone contact</label>
+              <input type="tel" name="phone" id="phone" class="form-control"
+                     value="{{ applicant.phone if applicant else '' }}" placeholder="+91 …">
+            </div>
+            <div class="col-md-8">
+              <label class="form-label" for="email">Electronic mail</label>
+              <input type="email" name="email" id="email" class="form-control"
+                     value="{{ applicant.email if applicant else '' }}" placeholder="name@domain.com">
+            </div>
+            <div class="col-12">
+              <label class="form-label" for="address">Residential address</label>
+              <input type="text" name="address" id="address" class="form-control"
+                     value="{{ applicant.address if applicant else '' }}" placeholder="Street, City, Postal Code, Country">
+            </div>
+          </div>
+
+          <div class="d-flex justify-content-end gap-2 mt-4 pt-3" style="border-top: var(--border);">
+            <a href="{{ url_for('admin_applicants') }}" class="btn btn-secondary">
+              Cancel
+            </a>
+            <button type="submit" class="btn btn-primary px-4">
+              {{ action }} applicant
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
   </div>
 </div>
 {% endblock %}

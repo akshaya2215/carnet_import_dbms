@@ -1,51 +1,63 @@
 {% extends "admin/base_admin.html" %}
-{% block title %}Dashboard — Admin{% endblock %}
+{% import "macros/components.html" as ui %}
+
+{% block title %}Administrative Overview — Vehicle Import Compliance{% endblock %}
 {% block page_title %}Overview{% endblock %}
 
 {% block content %}
 
-{# ── KPI tiles ────────────────────────────────────────────── #}
+{# ── Row of Clean KPI Tiles (No Icons-in-Circles) ─────────── #}
 <div class="row g-3 mb-4">
-  {% set kpis = [
-    ('Total applications', stats.total_apps, ''),
-    ('Eligible', stats.eligible, 'var(--c-success)'),
-    ('Rejected', stats.rejected, 'var(--c-danger)'),
-    ('Pending', stats.pending, 'var(--c-warning)'),
-    ('Expired carnets', stats.expired_carnets, 'var(--c-muted)'),
-  ] %}
-  {% for label, value, color in kpis %}
-  <div class="col-6 col-md-4 col-lg">
-    <div class="kpi-tile">
-      <div class="kpi-tile-value" {% if color %}style="color:{{ color }};"{% endif %}>{{ value }}</div>
-      <div class="kpi-tile-label">{{ label }}</div>
-    </div>
+  <div class="col-sm-6 col-md-4 col-xl">
+    {{ ui.kpi_tile('Total applications', stats.total_apps) }}
   </div>
-  {% endfor %}
+  <div class="col-sm-6 col-md-4 col-xl">
+    {{ ui.kpi_tile('Eligible', stats.eligible, 'var(--c-success)') }}
+  </div>
+  <div class="col-sm-6 col-md-4 col-xl">
+    {{ ui.kpi_tile('Rejected', stats.rejected, 'var(--c-danger)') }}
+  </div>
+  <div class="col-sm-6 col-md-4 col-xl">
+    {{ ui.kpi_tile('Pending', stats.pending, 'var(--c-warning)') }}
+  </div>
+  <div class="col-sm-6 col-md-4 col-xl">
+    {{ ui.kpi_tile('Expired carnets', stats.expired_carnets, 'var(--c-danger)') }}
+  </div>
 </div>
 
-{# ── Charts + recent ──────────────────────────────────────── #}
+{# ── Visual Analytics (Chart.js) & System Summary ─────────── #}
 <div class="row g-3 mb-4">
   <div class="col-lg-4 col-md-6">
-    <div class="app-card h-100">
-      <div class="app-card-header"><h3>Outcome breakdown</h3></div>
-      <div class="app-card-body" style="display:flex;flex-direction:column;align-items:center;">
-        <canvas id="outcomeChart" width="200" height="200" style="max-width:200px;"></canvas>
+    <div class="app-card h-100 mb-0">
+      <div class="app-card-header">
+        <h3>Outcome breakdown</h3>
+      </div>
+      <div class="app-card-body d-flex flex-column align-items-center">
+        <div style="position: relative; width: 180px; height: 180px;">
+          <canvas id="outcomeChart" width="180" height="180"></canvas>
+        </div>
         <div class="mt-3 w-100">
-          {% set total = (stats.eligible + stats.rejected)|int or 1 %}
+          {% set total_evals = (stats.eligible + stats.rejected + stats.pending)|int or 1 %}
           <div class="mini-bar-row">
-            <span class="mini-bar-label" style="color:var(--c-success);">Eligible</span>
-            <div class="mini-bar-track"><div class="mini-bar-fill" style="width:{{ (stats.eligible/total*100)|round|int }}%;background:var(--c-success);"></div></div>
+            <span class="mini-bar-label" style="color: var(--c-success);">Eligible</span>
+            <div class="mini-bar-track">
+              <div class="mini-bar-fill" style="width: {{ (stats.eligible / total_evals * 100)|round|int }}%; background-color: var(--c-success);"></div>
+            </div>
             <span class="mini-bar-count">{{ stats.eligible }}</span>
           </div>
           <div class="mini-bar-row">
-            <span class="mini-bar-label" style="color:var(--c-danger);">Rejected</span>
-            <div class="mini-bar-track"><div class="mini-bar-fill" style="width:{{ (stats.rejected/total*100)|round|int }}%;background:var(--c-danger);"></div></div>
+            <span class="mini-bar-label" style="color: var(--c-danger);">Rejected</span>
+            <div class="mini-bar-track">
+              <div class="mini-bar-fill" style="width: {{ (stats.rejected / total_evals * 100)|round|int }}%; background-color: var(--c-danger);"></div>
+            </div>
             <span class="mini-bar-count">{{ stats.rejected }}</span>
           </div>
           {% if stats.pending %}
           <div class="mini-bar-row">
-            <span class="mini-bar-label" style="color:var(--c-warning);">Pending</span>
-            <div class="mini-bar-track"><div class="mini-bar-fill" style="width:{{ (stats.pending/(stats.total_apps or 1)*100)|round|int }}%;background:var(--c-warning);"></div></div>
+            <span class="mini-bar-label" style="color: var(--c-warning);">Pending</span>
+            <div class="mini-bar-track">
+              <div class="mini-bar-fill" style="width: {{ (stats.pending / total_evals * 100)|round|int }}%; background-color: var(--c-warning);"></div>
+            </div>
             <span class="mini-bar-count">{{ stats.pending }}</span>
           </div>
           {% endif %}
@@ -55,16 +67,20 @@
   </div>
 
   <div class="col-lg-4 col-md-6">
-    <div class="app-card h-100">
-      <div class="app-card-header"><h3>By import type</h3></div>
-      <div class="app-card-body" style="display:flex;flex-direction:column;align-items:center;">
-        <canvas id="typeChart" width="200" height="200" style="max-width:200px;"></canvas>
+    <div class="app-card h-100 mb-0">
+      <div class="app-card-header">
+        <h3>Applications by import type</h3>
+      </div>
+      <div class="app-card-body d-flex flex-column align-items-center">
+        <div style="position: relative; width: 180px; height: 180px;">
+          <canvas id="typeChart" width="180" height="180"></canvas>
+        </div>
         <div class="mt-3 w-100">
           {% for row in by_type %}
           <div class="mini-bar-row">
-            <span class="mini-bar-label" style="font-size:.75rem;">{{ row.type_name.replace('_',' ')[:12] }}</span>
+            <span class="mini-bar-label" style="font-size: 0.75rem;">{{ row.type_name.replace('_',' ').title()[:12] }}</span>
             <div class="mini-bar-track">
-              <div class="mini-bar-fill" style="width:{{ (row.cnt/(stats.total_apps or 1)*100)|round|int }}%;background:var(--c-info);"></div>
+              <div class="mini-bar-fill" style="width: {{ (row.cnt / (stats.total_apps or 1) * 100)|round|int }}%; background-color: var(--c-info);"></div>
             </div>
             <span class="mini-bar-count">{{ row.cnt }}</span>
           </div>
@@ -75,80 +91,85 @@
   </div>
 
   <div class="col-lg-4">
-    <div class="app-card h-100">
-      <div class="app-card-header"><h3>Quick stats</h3></div>
+    <div class="app-card h-100 mb-0">
+      <div class="app-card-header">
+        <h3>System registry count</h3>
+      </div>
       <div class="app-card-body">
-        <div class="def-list" style="gap:.5rem;">
-          <dt>Active rules</dt>
-          <dd>{{ stats.active_rules }}</dd>
-          <dt>Total vehicles</dt>
+        <dl class="def-list" style="grid-template-columns: auto 1fr;">
+          <dt>Active statutory rules</dt>
+          <dd class="fw-600">{{ stats.active_rules }}</dd>
+
+          <dt>Vehicles on record</dt>
           <dd>{{ stats.total_vehicles }}</dd>
-          <dt>Total applicants</dt>
+
+          <dt>Registered applicants</dt>
           <dd>{{ stats.total_applicants }}</dd>
-          <dt>Active carnets</dt>
+
+          <dt>Active CPD carnets</dt>
           <dd>{{ stats.active_carnets }}</dd>
-          <dt>Expired carnets</dt>
-          <dd style="color:var(--c-danger);">{{ stats.expired_carnets }}</dd>
-        </div>
-        <div class="mt-3 d-flex gap-2 flex-wrap">
-          <a href="{{ url_for('admin_applications') }}" class="btn btn-primary btn-sm">Applications</a>
-          <a href="{{ url_for('admin_rules') }}" class="btn btn-secondary btn-sm">Rules</a>
+
+          <dt>Expired CPD carnets</dt>
+          <dd style="color: var(--c-danger);">{{ stats.expired_carnets }}</dd>
+        </dl>
+
+        <div class="mt-4 pt-3 d-flex gap-2 flex-wrap" style="border-top: var(--border);">
+          <a href="{{ url_for('admin_applications') }}" class="btn btn-primary btn-sm">
+            View all applications
+          </a>
+          <a href="{{ url_for('admin_rules') }}" class="btn btn-secondary btn-sm">
+            Manage rules
+          </a>
         </div>
       </div>
     </div>
   </div>
 </div>
 
-{# ── Recent applications ───────────────────────────────────── #}
+{# ── Recent Applications Table ────────────────────────────── #}
 <div class="app-card">
   <div class="app-card-header">
-    <h3>Recent applications</h3>
-    <a href="{{ url_for('admin_applications') }}" class="btn btn-secondary btn-sm">View all</a>
+    <h3>Recent application submissions</h3>
+    <a href="{{ url_for('admin_applications') }}" class="btn btn-secondary btn-sm">View full register</a>
   </div>
   <div class="app-card-body p-0">
     {% if recent %}
     <div class="table-scroll">
-      <table class="table mb-0">
+      <table class="table mb-0" id="adminRecentTable">
         <thead>
           <tr>
-            <th>#</th>
+            <th>Application</th>
             <th>Applicant</th>
-            <th>Vehicle</th>
-            <th>Import type</th>
-            <th>Date</th>
-            <th>Status</th>
-            <th></th>
+            <th>Vehicle model</th>
+            <th>Category</th>
+            <th>Submission date</th>
+            <th>Compliance status</th>
+            <th class="text-end">Certificate</th>
           </tr>
         </thead>
         <tbody>
           {% for r in recent %}
           <tr>
-            <td><span class="fw-600">#{{ r.application_id }}</span></td>
-            <td>{{ r.full_name }}</td>
-            <td>{{ r.model }}</td>
-            <td><span class="badge badge-inactive" style="font-size:.65rem;">{{ r.type_name.replace('_',' ').title() }}</span></td>
-            <td class="text-muted">{{ r.application_date }}</td>
-            <td>
-              {% if r.status == 'ELIGIBLE' %}
-                <span class="badge badge-eligible">Eligible</span>
-              {% elif r.status == 'REJECTED' %}
-                <span class="badge badge-rejected">Rejected</span>
-              {% else %}
-                <span class="badge badge-pending">{{ r.status.title() }}</span>
-              {% endif %}
+            <td class="mono fw-600">
+              #{{ "%04d"|format(r.application_id) if r.application_id < 1000 else r.application_id }}
             </td>
-            <td><a href="{{ url_for('result', application_id=r.application_id) }}" class="btn btn-secondary btn-sm" target="_blank">Report</a></td>
+            <td class="fw-500">{{ r.full_name }}</td>
+            <td>{{ r.model }}</td>
+            <td><span class="badge badge-info">{{ r.type_name.replace('_',' ').title() }}</span></td>
+            <td class="text-muted">{{ r.application_date }}</td>
+            <td>{{ ui.status_badge(r.status) }}</td>
+            <td class="text-end">
+              <a href="{{ url_for('result', application_id=r.application_id) }}" class="btn btn-secondary btn-sm" target="_blank" rel="noopener">
+                View report
+              </a>
+            </td>
           </tr>
           {% endfor %}
         </tbody>
       </table>
     </div>
     {% else %}
-    <div class="empty-state">
-      <div class="empty-state-icon">📋</div>
-      <h4>No applications yet</h4>
-      <p>Applications submitted through the public form will appear here.</p>
-    </div>
+      {{ ui.empty_state("📋", "No applications submitted", "Applications filed via the public portal will appear here for audit and processing.") }}
     {% endif %}
   </div>
 </div>
@@ -157,42 +178,59 @@
 
 {% block extra_js %}
 <script>
-(function() {
-  const eligible = {{ stats.eligible }};
-  const rejected = {{ stats.rejected }};
-  const pending  = {{ stats.pending }};
+document.addEventListener('DOMContentLoaded', () => {
+  // Outcome doughnut chart
+  const outcomeCtx = document.getElementById('outcomeChart');
+  if (outcomeCtx) {
+    new Chart(outcomeCtx, {
+      type: 'doughnut',
+      data: {
+        labels: ['Eligible', 'Rejected', 'Pending'],
+        datasets: [{
+          data: [{{ stats.eligible }}, {{ stats.rejected }}, {{ stats.pending }}],
+          backgroundColor: ['#1E7B4F', '#B42318', '#B54708'],
+          borderWidth: 2,
+          borderColor: '#FFFFFF'
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false }
+        },
+        cutout: '72%'
+      }
+    });
+  }
 
-  const byType = {{ by_type | tojson }};
+  // Import type bar chart
+  const typeCtx = document.getElementById('typeChart');
+  if (typeCtx) {
+    const typeLabels = [{% for row in by_type %}'{{ row.type_name.replace("_"," ").title()[:12] }}',{% endfor %}];
+    const typeCounts = [{% for row in by_type %}{{ row.cnt }},{% endfor %}];
 
-  const chartDefaults = {
-    type: 'doughnut',
-    options: {
-      plugins: { legend: { display: false } },
-      cutout: '65%',
-      responsive: true,
-      maintainAspectRatio: true,
-    }
-  };
-
-  new Chart(document.getElementById('outcomeChart'), {
-    ...chartDefaults,
-    data: {
-      labels: ['Eligible', 'Rejected', 'Pending'],
-      datasets: [{ data: [eligible, rejected, pending],
-        backgroundColor: ['#1E7B4F','#B42318','#B54708'],
-        borderWidth: 2, borderColor: '#fff' }]
-    }
-  });
-
-  new Chart(document.getElementById('typeChart'), {
-    ...chartDefaults,
-    data: {
-      labels: byType.map(r => r.type_name.replace(/_/g,' ')),
-      datasets: [{ data: byType.map(r => r.cnt),
-        backgroundColor: ['#1D5FA8','#E08A00','#2B3445'],
-        borderWidth: 2, borderColor: '#fff' }]
-    }
-  });
-})();
+    new Chart(typeCtx, {
+      type: 'doughnut',
+      data: {
+        labels: typeLabels,
+        datasets: [{
+          data: typeCounts,
+          backgroundColor: ['#1D5FA8', '#14213D', '#E08A00', '#667085'],
+          borderWidth: 2,
+          borderColor: '#FFFFFF'
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false }
+        },
+        cutout: '72%'
+      }
+    });
+  }
+});
 </script>
 {% endblock %}

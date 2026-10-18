@@ -1,209 +1,229 @@
 {% extends "base.html" %}
-{% block title %}Check vehicle eligibility — India Vehicle Import{% endblock %}
-{% block meta_desc %}Enter vehicle and applicant details to receive a per-rule eligibility report.{% endblock %}
+
+{% block title %}Check Vehicle Import Eligibility — India Customs Compliance{% endblock %}
+{% block meta_desc %}Submit vehicle specifications and applicant documents to verify compliance against statutory Indian customs rules.{% endblock %}
 
 {% block content %}
 <div class="row justify-content-center">
-<div class="col-lg-10 col-xl-9">
+  <div class="col-lg-10 col-xl-9">
 
-  <div class="mb-4">
-    <nav aria-label="breadcrumb">
-      <ol class="breadcrumb" style="font-size:.8125rem;">
-        <li class="breadcrumb-item"><a href="{{ url_for('index') }}">Home</a></li>
-        <li class="breadcrumb-item active">Check eligibility</li>
-      </ol>
-    </nav>
-    <h1 class="mb-1">Check vehicle eligibility</h1>
-    <p class="text-muted" style="font-size:.9375rem;max-width:58ch;">
-      Complete all sections and submit. The database evaluates every active rule and returns a detailed per-rule report.
-    </p>
-  </div>
+    {# Breadcrumbs and Header #}
+    <div class="mb-4">
+      <nav aria-label="breadcrumb">
+        <ol class="breadcrumb mb-2" style="font-size: 0.8125rem;">
+          <li class="breadcrumb-item"><a href="{{ url_for('index') }}">Home</a></li>
+          <li class="breadcrumb-item active" aria-current="page">Check eligibility</li>
+        </ol>
+      </nav>
+      <h1 class="mb-1">Check vehicle import eligibility</h1>
+      <p class="text-muted mb-0" style="font-size: 0.9375rem; max-width: 65ch;">
+        Complete all sections below. The database evaluates active customs eligibility rules and produces a verifiable compliance record.
+      </p>
+    </div>
 
-  <form method="POST" action="{{ url_for('check') }}" id="checkForm" novalidate>
+    <form method="POST" action="{{ url_for('check') }}" id="checkForm" novalidate>
+      <div class="app-card mb-4">
 
-    <div class="app-card mb-3">
-
-      {# ── Section 1: Applicant ── #}
-      <div class="app-card-body form-section">
-        <div class="form-section-title">Applicant</div>
-        <div class="row g-3">
-          <div class="col-md-6">
-            <label class="form-label" for="full_name">Full name</label>
-            <input type="text" name="full_name" id="full_name" class="form-control" required
-                   placeholder="As on passport" autocomplete="name">
+        {# ── Section 1: Applicant ── #}
+        <div class="form-section">
+          <div class="form-section-title">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            <span>Applicant details</span>
           </div>
-          <div class="col-md-6">
-            <label class="form-label" for="passport_number">Passport number</label>
-            <input type="text" name="passport_number" id="passport_number" class="form-control" required
-                   placeholder="e.g. IN1234567" autocomplete="off">
-            <div class="form-text">If already registered, existing details are matched automatically.</div>
-          </div>
-          <div class="col-md-4">
-            <label class="form-label" for="phone">Phone</label>
-            <input type="tel" name="phone" id="phone" class="form-control"
-                   placeholder="+91 …" autocomplete="tel">
-          </div>
-          <div class="col-md-4">
-            <label class="form-label" for="email">Email</label>
-            <input type="email" name="email" id="email" class="form-control"
-                   placeholder="you@example.com" autocomplete="email">
-          </div>
-          <div class="col-md-4">
-            <label class="form-label" for="address">Address</label>
-            <input type="text" name="address" id="address" class="form-control"
-                   placeholder="City, country">
-          </div>
-        </div>
-      </div>
-
-      {# ── Section 2: Vehicle ── #}
-      <div class="app-card-body form-section">
-        <div class="form-section-title">Vehicle</div>
-        <div class="row g-3">
-          <div class="col-md-6">
-            <label class="form-label" for="vin">VIN / chassis number</label>
-            <input type="text" name="vin" id="vin" class="form-control mono text-uppercase" required
-                   placeholder="17-character VIN" maxlength="50" autocomplete="off">
-          </div>
-          <div class="col-md-6">
-            <label class="form-label" for="model">Model</label>
-            <input type="text" name="model" id="model" class="form-control" required
-                   placeholder="e.g. Land Cruiser">
-          </div>
-          <div class="col-md-6">
-            <label class="form-label" for="manufacturer_id">Manufacturer</label>
-            <select name="manufacturer_id" id="manufacturer_id" class="form-select" required>
-              <option value="">Select manufacturer…</option>
-              {% for m in manufacturers %}
-              <option value="{{ m.manufacturer_id }}">{{ m.name }}</option>
-              {% endfor %}
-            </select>
-          </div>
-          <div class="col-md-6">
-            <label class="form-label" for="origin_country_id">Country of origin</label>
-            <select name="origin_country_id" id="origin_country_id" class="form-select" required>
-              <option value="">Select country…</option>
-              {% for c in countries %}
-              <option value="{{ c.country_id }}">{{ c.country_name }}</option>
-              {% endfor %}
-            </select>
-          </div>
-          <div class="col-md-3">
-            <label class="form-label" for="manufacture_year">Year of manufacture</label>
-            <input type="number" name="manufacture_year" id="manufacture_year" class="form-control" required
-                   min="1900" max="2030" placeholder="e.g. 2022">
-          </div>
-          <div class="col-md-3">
-            <label class="form-label" for="fuel_type">Fuel type</label>
-            <select name="fuel_type" id="fuel_type" class="form-select" required>
-              <option value="">Select…</option>
-              {% for f in ['PETROL','DIESEL','ELECTRIC','HYBRID','CNG'] %}
-              <option>{{ f }}</option>
-              {% endfor %}
-            </select>
-          </div>
-          <div class="col-md-3">
-            <label class="form-label" for="engine_cc">Engine displacement (cc)</label>
-            <input type="number" name="engine_cc" id="engine_cc" class="form-control"
-                   min="0" placeholder="e.g. 2000">
-            <div class="form-text">Enter 0 for electric vehicles.</div>
-          </div>
-          <div class="col-md-3">
-            <label class="form-label" for="steering_side">Steering position</label>
-            <select name="steering_side" id="steering_side" class="form-select" required>
-              <option value="">Select…</option>
-              <option value="RIGHT">Right-hand drive</option>
-              <option value="LEFT">Left-hand drive</option>
-            </select>
-            <div class="form-text">India requires right-hand drive.</div>
-          </div>
-        </div>
-      </div>
-
-      {# ── Section 3: Import type ── #}
-      <div class="app-card-body form-section">
-        <div class="form-section-title">Import type</div>
-        <div class="row g-3">
-          <div class="col-md-6">
-            <label class="form-label" for="importTypeSelect">Category</label>
-            <select name="import_type_id" id="importTypeSelect" class="form-select" required>
-              <option value="">Select import category…</option>
-              {% for t in import_types %}
-              <option value="{{ t.import_type_id }}">{{ t.type_name.replace('_',' ').title() }}</option>
-              {% endfor %}
-            </select>
-          </div>
-        </div>
-
-        {# Carnet sub-section #}
-        <div id="carnetSection" style="display:none;margin-top:1.25rem;">
-          <p class="form-section-title mb-2">Carnet de Passages</p>
           <div class="row g-3">
             <div class="col-md-6">
-              <label class="form-label" for="carnet_number">Carnet number</label>
-              <input type="text" name="carnet_number" id="carnet_number" class="form-control mono"
-                     placeholder="e.g. CPD-UK-2024-001">
-              <div class="form-text">If already on file, matching happens automatically.</div>
+              <label class="form-label" for="full_name">Full name <span class="text-danger">*</span></label>
+              <input type="text" name="full_name" id="full_name" class="form-control" required
+                     placeholder="As printed on passport" autocomplete="name">
+              <div class="form-text">Must match official identification.</div>
             </div>
             <div class="col-md-6">
-              <label class="form-label" for="carnet_country_id">Issuing country</label>
-              <select name="carnet_country_id" id="carnet_country_id" class="form-select">
-                <option value="">Select country…</option>
+              <label class="form-label" for="passport_number">Passport number <span class="text-danger">*</span></label>
+              <input type="text" name="passport_number" id="passport_number" class="form-control mono text-uppercase" required
+                     placeholder="e.g. Z1234567" autocomplete="off">
+              <div class="form-text">Used to match existing applicant records automatically.</div>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label" for="phone">Phone number</label>
+              <input type="tel" name="phone" id="phone" class="form-control"
+                     placeholder="+91 98765 43210" autocomplete="tel">
+            </div>
+            <div class="col-md-4">
+              <label class="form-label" for="email">Email address</label>
+              <input type="email" name="email" id="email" class="form-control"
+                     placeholder="applicant@domain.com" autocomplete="email">
+            </div>
+            <div class="col-md-4">
+              <label class="form-label" for="address">Residential address</label>
+              <input type="text" name="address" id="address" class="form-control"
+                     placeholder="City, Country">
+            </div>
+          </div>
+        </div>
+
+        {# ── Section 2: Vehicle ── #}
+        <div class="form-section">
+          <div class="form-section-title">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="8" width="22" height="12" rx="2"/><path d="M5 8V6a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v2"/><circle cx="7" cy="17" r="1.5"/><circle cx="17" cy="17" r="1.5"/></svg>
+            <span>Vehicle specifications</span>
+          </div>
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label" for="vin">VIN / Chassis number <span class="text-danger">*</span></label>
+              <input type="text" name="vin" id="vin" class="form-control mono text-uppercase" required
+                     placeholder="17-character VIN" maxlength="50" autocomplete="off">
+              <div class="form-text">Vehicle Identification Number found on registration papers.</div>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label" for="model">Model description <span class="text-danger">*</span></label>
+              <input type="text" name="model" id="model" class="form-control" required
+                     placeholder="e.g. Land Cruiser 300, Defender 110">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label" for="manufacturer_id">Manufacturer <span class="text-danger">*</span></label>
+              <select name="manufacturer_id" id="manufacturer_id" class="form-select" required>
+                <option value="">Select vehicle manufacturer…</option>
+                {% for m in manufacturers %}
+                <option value="{{ m.manufacturer_id }}">{{ m.name }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label" for="origin_country_id">Country of origin / export <span class="text-danger">*</span></label>
+              <select name="origin_country_id" id="origin_country_id" class="form-select" required>
+                <option value="">Select country of export…</option>
                 {% for c in countries %}
                 <option value="{{ c.country_id }}">{{ c.country_name }}</option>
                 {% endfor %}
               </select>
             </div>
-            <div class="col-md-6">
-              <label class="form-label" for="carnet_issue_date">Issue date</label>
-              <input type="date" name="carnet_issue_date" id="carnet_issue_date" class="form-control">
+            <div class="col-md-3">
+              <label class="form-label" for="manufacture_year">Manufacture year <span class="text-danger">*</span></label>
+              <input type="number" name="manufacture_year" id="manufacture_year" class="form-control" required
+                     min="1900" max="2035" placeholder="YYYY (e.g. 2023)">
+              <div class="form-text">Evaluated against age rules.</div>
             </div>
-            <div class="col-md-6">
-              <label class="form-label" for="carnet_expiry_date">Expiry date</label>
-              <input type="date" name="carnet_expiry_date" id="carnet_expiry_date" class="form-control">
+            <div class="col-md-3">
+              <label class="form-label" for="fuel_type">Fuel type <span class="text-danger">*</span></label>
+              <select name="fuel_type" id="fuel_type" class="form-select" required>
+                <option value="">Select…</option>
+                {% for f in ['PETROL','DIESEL','ELECTRIC','HYBRID','CNG'] %}
+                <option value="{{ f }}">{{ f }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="col-md-3">
+              <label class="form-label" for="engine_cc">Engine displacement (cc)</label>
+              <input type="number" name="engine_cc" id="engine_cc" class="form-control"
+                     min="0" placeholder="e.g. 1997">
+              <div class="form-text">Specify 0 for pure electric vehicles.</div>
+            </div>
+            <div class="col-md-3">
+              <label class="form-label" for="steering_side">Steering position <span class="text-danger">*</span></label>
+              <select name="steering_side" id="steering_side" class="form-select" required>
+                <option value="">Select…</option>
+                <option value="RIGHT">Right-hand drive</option>
+                <option value="LEFT">Left-hand drive</option>
+              </select>
+              <div class="form-text">India mandates right-hand drive.</div>
             </div>
           </div>
         </div>
-      </div>
 
-      {# ── Section 4: Documents ── #}
-      <div class="app-card-body form-section">
-        <div class="form-section-title">Documents submitted</div>
-        <p class="text-muted mb-3" style="font-size:.8125rem;max-width:60ch;">
-          Check every document you are submitting. Documents marked <strong>required</strong> must be present.
-        </p>
-        <div class="row g-2">
-          {% for doc in documents %}
-          <div class="col-md-4 col-sm-6">
-            <label class="d-flex align-items-start gap-2 p-3 border rounded cursor-pointer"
-                   style="border-radius:var(--r-sm);cursor:pointer;font-size:.875rem;{% if doc.is_mandatory %}border-color:#f5bfbb !important;background:var(--c-danger-bg);{% endif %}"
-                   for="doc_{{ doc.document_id }}">
-              <input class="form-check-input mt-0 flex-shrink-0" type="checkbox"
-                     name="document_ids" value="{{ doc.document_id }}"
-                     id="doc_{{ doc.document_id }}">
-              <span>
+        {# ── Section 3: Import type & Carnet ── #}
+        <div class="form-section">
+          <div class="form-section-title">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+            <span>Import category &amp; Carnet</span>
+          </div>
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label" for="importTypeSelect">Customs import category <span class="text-danger">*</span></label>
+              <select name="import_type_id" id="importTypeSelect" class="form-select" required>
+                <option value="">Select statutory import category…</option>
+                {% for t in import_types %}
+                <option value="{{ t.import_type_id }}">{{ t.type_name.replace('_',' ').title() }}</option>
+                {% endfor %}
+              </select>
+              <div class="form-text">Select Temporary Carnet if entering under CPD.</div>
+            </div>
+          </div>
+
+          {# Carnet conditional sub-panel #}
+          <div id="carnetSection" style="display:none; margin-top: 1.25rem; padding-top: 1.25rem; border-top: 1px dashed var(--c-border);">
+            <div class="form-section-title mb-2" style="font-size: 0.875rem;">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+              <span>Carnet de Passages en Douane (CPD) details</span>
+            </div>
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label class="form-label" for="carnet_number">Carnet document number</label>
+                <input type="text" name="carnet_number" id="carnet_number" class="form-control mono text-uppercase"
+                       placeholder="e.g. CPD-UK-2024-001">
+                <div class="form-text">Existing carnet records will be matched automatically.</div>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label" for="carnet_country_id">Issuing automobile association country</label>
+                <select name="carnet_country_id" id="carnet_country_id" class="form-select">
+                  <option value="">Select issuing country…</option>
+                  {% for c in countries %}
+                  <option value="{{ c.country_id }}">{{ c.country_name }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label" for="carnet_issue_date">Carnet issue date</label>
+                <input type="date" name="carnet_issue_date" id="carnet_issue_date" class="form-control">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label" for="carnet_expiry_date">Carnet expiry date</label>
+                <input type="date" name="carnet_expiry_date" id="carnet_expiry_date" class="form-control">
+                <div class="form-text">Must be valid through the proposed duration of stay.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {# ── Section 4: Documents ── #}
+        <div class="form-section">
+          <div class="form-section-title">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            <span>Submitted documentation</span>
+          </div>
+          <p class="text-muted mb-3" style="font-size: 0.8125rem;">
+            Check each document available for customs verification. Items labeled <strong>Required</strong> are evaluated by mandatory document rules.
+          </p>
+
+          <div class="doc-selection-grid">
+            {% for doc in documents %}
+            <label class="doc-selection-item {% if doc.is_mandatory %}mandatory{% endif %}" for="doc_{{ doc.document_id }}">
+              <input class="form-check-input" type="checkbox" name="document_ids"
+                     value="{{ doc.document_id }}" id="doc_{{ doc.document_id }}">
+              <span class="doc-selection-label">
                 {{ doc.document_name }}
                 {% if doc.is_mandatory %}
-                  <span class="badge badge-rejected ms-1" style="font-size:.6rem;">Required</span>
+                  <span class="badge badge-danger ms-1" style="font-size: 0.65rem;">Required</span>
                 {% endif %}
               </span>
             </label>
+            {% endfor %}
           </div>
-          {% endfor %}
         </div>
+
+        {# ── Form Action Bar ── #}
+        <div class="app-card-body d-flex align-items-center justify-content-end gap-2 bg-light">
+          <a href="{{ url_for('index') }}" class="btn btn-secondary">
+            Cancel
+          </a>
+          <button type="submit" class="btn btn-primary px-4" id="submitBtn">
+            <span>Run eligibility check</span>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+          </button>
+        </div>
+
       </div>
+    </form>
 
-      {# ── Submit ── #}
-      <div class="app-card-body d-flex align-items-center justify-content-end gap-3">
-        <a href="{{ url_for('index') }}" class="btn btn-secondary">Cancel</a>
-        <button type="submit" class="btn btn-primary px-4" id="submitBtn">
-          Run eligibility check
-        </button>
-      </div>
-
-    </div>{# /app-card #}
-  </form>
-
-</div>
+  </div>
 </div>
 {% endblock %}

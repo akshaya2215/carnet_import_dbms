@@ -1,76 +1,103 @@
 {% extends "admin/base_admin.html" %}
-{% block title %}{{ action }} Rule — Admin{% endblock %}
+
+{% block title %}{{ action }} Rule — Customs Admin{% endblock %}
 {% block page_title %}{{ action }} Eligibility Rule{% endblock %}
+
 {% block content %}
 <div class="row justify-content-center">
-<div class="col-lg-7">
-  <div class="mb-3"><a href="{{ url_for('admin_rules') }}" class="btn btn-secondary btn-sm">← Back to rules</a></div>
-  <div class="app-card">
-    <div class="app-card-header"><h3>{{ action }} eligibility rule</h3></div>
-    <div class="app-card-body">
-      <form method="POST">
-        <div class="row g-3">
-          <div class="col-12">
-            <label class="form-label" for="rule_name">Rule name</label>
-            <input type="text" name="rule_name" id="rule_name" class="form-control" required
-                   value="{{ rule.rule_name if rule else '' }}">
-          </div>
-          <div class="col-md-6">
-            <label class="form-label" for="rule_type">Check type</label>
-            <select name="rule_type" id="rule_type" class="form-select" required>
-              {% for rt in ['VEHICLE_AGE','DRIVING_SIDE','FUEL_TYPE','ENGINE_CC','CARNET_VALID','DOCUMENT_REQUIRED'] %}
-              <option {% if rule and rule.rule_type==rt %}selected{% endif %}>{{ rt }}</option>
-              {% endfor %}
-            </select>
-          </div>
-          <div class="col-md-3">
-            <label class="form-label" for="operator">Operator</label>
-            <select name="operator" id="operator" class="form-select" required>
-              {% for op in ['=','!=','<','<=','>','>=','IN'] %}
-              <option {% if rule and rule.operator==op %}selected{% endif %}>{{ op }}</option>
-              {% endfor %}
-            </select>
-          </div>
-          <div class="col-md-3">
-            <label class="form-label" for="expected_value">Expected value</label>
-            <input type="text" name="expected_value" id="expected_value" class="form-control mono" required
-                   value="{{ rule.expected_value if rule else '' }}" placeholder="e.g. 3, RIGHT, YES">
-          </div>
-          <div class="col-md-6">
-            <label class="form-label" for="import_type_id">Import category</label>
-            <select name="import_type_id" id="import_type_id" class="form-select">
-              <option value="">All categories (no restriction)</option>
-              {% for it in import_types %}
-              <option value="{{ it.import_type_id }}" {% if rule and rule.import_type_id==it.import_type_id %}selected{% endif %}>{{ it.type_name.replace('_',' ').title() }}</option>
-              {% endfor %}
-            </select>
-          </div>
-          <div class="col-md-6">
-            <label class="form-label" for="effective_date">Effective from</label>
-            <input type="date" name="effective_date" id="effective_date" class="form-control" required
-                   value="{{ rule.effective_date if rule else '' }}">
-          </div>
-          <div class="col-12">
-            <label class="form-label" for="description">Description</label>
-            <input type="text" name="description" id="description" class="form-control"
-                   value="{{ rule.description if rule else '' }}" maxlength="255"
-                   placeholder="Plain-language description of what this rule checks">
-          </div>
-          <div class="col-12">
-            <div class="form-check">
-              <input type="checkbox" name="is_active" id="is_active" class="form-check-input"
-                     {% if not rule or rule.is_active %}checked{% endif %}>
-              <label class="form-check-label" for="is_active">Rule is active</label>
+  <div class="col-lg-8">
+    <div class="mb-3">
+      <a href="{{ url_for('admin_rules') }}" class="btn btn-secondary btn-sm">
+        ← Back to rules register
+      </a>
+    </div>
+
+    <div class="app-card">
+      <div class="app-card-header">
+        <h3>{{ action }} statutory eligibility rule</h3>
+      </div>
+      <div class="app-card-body">
+        <form method="POST" novalidate>
+          <div class="row g-3">
+            <div class="col-12">
+              <label class="form-label" for="rule_name">Rule designation <span class="text-danger">*</span></label>
+              <input type="text" name="rule_name" id="rule_name" class="form-control" required
+                     value="{{ rule.rule_name if rule else '' }}" placeholder="e.g. Max vehicle age (TR)">
+              <div class="form-text">Concise institutional name displayed on evaluation reports.</div>
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label" for="rule_type">Check evaluation type <span class="text-danger">*</span></label>
+              <select name="rule_type" id="rule_type" class="form-select" required>
+                {% for rt in ['VEHICLE_AGE','DRIVING_SIDE','FUEL_TYPE','ENGINE_CC','CARNET_VALID','DOCUMENT_REQUIRED'] %}
+                <option value="{{ rt }}" {% if rule and rule.rule_type == rt %}selected{% endif %}>
+                  {{ rt.replace('_', ' ').title() }}
+                </option>
+                {% endfor %}
+              </select>
+            </div>
+
+            <div class="col-md-3">
+              <label class="form-label" for="operator">Comparison operator <span class="text-danger">*</span></label>
+              <select name="operator" id="operator" class="form-select mono" required>
+                {% for op in ['=','!=','<','<=','>','>=','IN'] %}
+                <option value="{{ op }}" {% if rule and rule.operator == op %}selected{% endif %}>{{ op }}</option>
+                {% endfor %}
+              </select>
+            </div>
+
+            <div class="col-md-3">
+              <label class="form-label" for="expected_value">Expected value <span class="text-danger">*</span></label>
+              <input type="text" name="expected_value" id="expected_value" class="form-control mono" required
+                     value="{{ rule.expected_value if rule else '' }}" placeholder="e.g. 3, RIGHT, 1">
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label" for="import_type_id">Statutory import category</label>
+              <select name="import_type_id" id="import_type_id" class="form-select">
+                <option value="">All categories (universal rule)</option>
+                {% for it in import_types %}
+                <option value="{{ it.import_type_id }}" {% if rule and rule.import_type_id == it.import_type_id %}selected{% endif %}>
+                  {{ it.type_name.replace('_',' ').title() }}
+                </option>
+                {% endfor %}
+              </select>
+              <div class="form-text">Leave blank to apply this criterion to all import categories.</div>
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label" for="effective_date">Effective gazette date <span class="text-danger">*</span></label>
+              <input type="date" name="effective_date" id="effective_date" class="form-control" required
+                     value="{{ rule.effective_date if rule else '' }}">
+            </div>
+
+            <div class="col-12">
+              <label class="form-label" for="description">Statutory description &amp; notification reference</label>
+              <input type="text" name="description" id="description" class="form-control"
+                     value="{{ rule.description if rule else '' }}" maxlength="255"
+                     placeholder="Plain-language description of what this rule verifies">
+            </div>
+
+            <div class="col-12">
+              <div class="form-check form-switch mt-1">
+                <input type="checkbox" name="is_active" id="is_active" class="form-check-input"
+                       {% if not rule or rule.is_active %}checked{% endif %}>
+                <label class="form-check-label fw-500 ms-1" for="is_active">Rule is active and evaluated in stored procedures</label>
+              </div>
             </div>
           </div>
-        </div>
-        <div class="d-flex justify-content-end gap-2 mt-4 pt-3" style="border-top:var(--border);">
-          <a href="{{ url_for('admin_rules') }}" class="btn btn-secondary">Cancel</a>
-          <button type="submit" class="btn btn-primary">{{ action }} rule</button>
-        </div>
-      </form>
+
+          <div class="d-flex justify-content-end gap-2 mt-4 pt-3" style="border-top: var(--border);">
+            <a href="{{ url_for('admin_rules') }}" class="btn btn-secondary">
+              Cancel
+            </a>
+            <button type="submit" class="btn btn-primary px-4">
+              {{ action }} rule
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
   </div>
-</div>
 </div>
 {% endblock %}

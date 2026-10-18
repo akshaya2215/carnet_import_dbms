@@ -3,129 +3,54 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>{% block title %}Admin — Vehicle Import{% endblock %}</title>
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%2314213D'/><text y='22' x='5' font-size='20' font-family='serif'>🚗</text></svg>">
+  <title>{% block title %}Customs Administration — Vehicle Import{% endblock %}</title>
+
+  {# Institutional SVG Favicon #}
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%2314213D'/><path d='M6 18h20M9 18l2-6h10l2 6' stroke='%23E08A00' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' fill='none'/><circle cx='10' cy='22' r='2' fill='%23FFFFFF'/><circle cx='22' cy='22' r='2' fill='%23FFFFFF'/></svg>">
+
+  {# Bootstrap 5 — Grid & Utilities #}
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  {# Customs Design System #}
   <link href="{{ url_for('static', filename='css/app.css') }}" rel="stylesheet">
+
   {% block extra_head %}{% endblock %}
 </head>
-<body style="background:var(--c-bg);">
+<body style="background-color: var(--c-bg);">
 
 <div class="admin-wrap">
+  {# Fixed Navy Sidebar #}
+  {% include "partials/admin_sidebar.html" %}
 
-  {# ── Sidebar ───────────────────────────────────────────── #}
-  <nav class="sidebar" id="adminSidebar" aria-label="Admin navigation">
-    <a class="sidebar-brand" href="{{ url_for('admin_dashboard') }}">
-      <svg width="20" height="20" fill="none" stroke="rgba(255,255,255,.8)" stroke-width="2" viewBox="0 0 24 24"><rect x="1" y="8" width="22" height="12" rx="2"/><path d="M5 8V6a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v2"/><circle cx="7" cy="17" r="1.5"/><circle cx="17" cy="17" r="1.5"/></svg>
-      Vehicle Import
-    </a>
-
-    <a class="sidebar-link {% if request.endpoint=='admin_dashboard' %}active{% endif %}"
-       href="{{ url_for('admin_dashboard') }}">
-      <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
-      Overview
-    </a>
-
-    <div class="sidebar-section-label">Records</div>
-    <a class="sidebar-link {% if 'vehicle' in request.endpoint and 'admin' in request.endpoint %}active{% endif %}"
-       href="{{ url_for('admin_vehicles') }}">
-      <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="1" y="9" width="22" height="10" rx="2"/><path d="M5 9V7a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v2"/><circle cx="7" cy="16" r="1.5"/><circle cx="17" cy="16" r="1.5"/></svg>
-      Vehicles
-    </a>
-    <a class="sidebar-link {% if 'manufacturer' in request.endpoint %}active{% endif %}"
-       href="{{ url_for('admin_manufacturers') }}">
-      <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 21h18M5 21V7l7-4 7 4v14"/></svg>
-      Manufacturers
-    </a>
-    <a class="sidebar-link {% if 'countr' in request.endpoint %}active{% endif %}"
-       href="{{ url_for('admin_countries') }}">
-      <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15 15 0 0 1 0 20M12 2a15 15 0 0 0 0 20"/></svg>
-      Countries
-    </a>
-    <a class="sidebar-link {% if 'applicant' in request.endpoint %}active{% endif %}"
-       href="{{ url_for('admin_applicants') }}">
-      <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-      Applicants
-    </a>
-    <a class="sidebar-link {% if 'carnet' in request.endpoint %}active{% endif %}"
-       href="{{ url_for('admin_carnets') }}">
-      <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>
-      Carnets
-    </a>
-
-    <div class="sidebar-section-label">Processing</div>
-    <a class="sidebar-link {% if request.endpoint == 'admin_applications' or request.endpoint == 'admin_application_rerun' %}active{% endif %}"
-       href="{{ url_for('admin_applications') }}">
-      <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-      Applications
-    </a>
-    <a class="sidebar-link {% if 'document' in request.endpoint %}active{% endif %}"
-       href="{{ url_for('admin_documents') }}">
-      <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-      Documents
-    </a>
-    <a class="sidebar-link {% if 'rule' in request.endpoint and 'audit' not in request.endpoint and 'result' not in request.endpoint %}active{% endif %}"
-       href="{{ url_for('admin_rules') }}">
-      <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
-      Rules
-    </a>
-    <a class="sidebar-link {% if 'result' in request.endpoint %}active{% endif %}"
-       href="{{ url_for('admin_results') }}">
-      <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-      Results
-    </a>
-    <a class="sidebar-link {% if request.endpoint == 'admin_auditlog' %}active{% endif %}"
-       href="{{ url_for('admin_auditlog') }}">
-      <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/></svg>
-      Audit log
-    </a>
-
-    <div class="sidebar-section-label">Insights</div>
-    <a class="sidebar-link {% if request.endpoint == 'admin_reports' %}active{% endif %}"
-       href="{{ url_for('admin_reports') }}">
-      <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
-      Reports
-    </a>
-
-    <div class="sidebar-footer">
-      <a href="{{ url_for('index') }}" style="color:rgba(255,255,255,.4);text-decoration:none;font-size:.75rem;" target="_blank">
-        ↗ Public site
-      </a>
-    </div>
-  </nav>
-
-  {# ── Admin main ───────────────────────────────────────── #}
+  {# Admin Main Viewport #}
   <div class="admin-main">
-    <div class="admin-topbar">
-      {# Mobile sidebar toggle #}
-      <button class="menu-toggle me-2" id="sidebarToggle" aria-label="Toggle sidebar">
-        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
-      </button>
-      <h1 class="admin-topbar-title">{% block page_title %}Admin{% endblock %}</h1>
-      <div class="admin-topbar-right">
-        <span>{{ session.get('admin_name', 'admin') }}</span>
-        <a href="{{ url_for('admin_logout') }}" class="btn btn-secondary btn-sm">Sign out</a>
+    <header class="admin-topbar">
+      <div class="d-flex align-items-center gap-2">
+        <button class="menu-toggle" id="sidebarToggle" aria-label="Toggle admin sidebar" aria-controls="adminSidebar">
+          <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        </button>
+        <h1 class="admin-topbar-title">{% block page_title %}Overview{% endblock %}</h1>
       </div>
-    </div>
 
-    {# Flash messages #}
-    <div class="px-3 pt-2">
-      {% with messages = get_flashed_messages(with_categories=true) %}
-        {% for cat, msg in messages %}
-          <div class="alert alert-{{ 'success' if cat=='success' else 'danger' if cat=='danger' else 'warning' if cat=='warning' else 'info' }} alert-dismissible flash-alert d-flex align-items-start gap-2" role="alert">
-            <span>{% if cat=='success' %}✓{% elif cat=='danger' %}✕{% else %}ℹ{% endif %}</span>
-            <span>{{ msg }}</span>
-            <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert" aria-label="Dismiss"></button>
-          </div>
-        {% endfor %}
-      {% endwith %}
-    </div>
+      <div class="admin-topbar-right">
+        <span class="d-none d-sm-inline" style="color: var(--c-muted); font-size: 0.8125rem;">
+          Signed in as <strong style="color: var(--c-navy);">{{ session.get('admin_name', 'admin') }}</strong>
+        </span>
+        <a href="{{ url_for('admin_logout') }}" class="btn btn-secondary btn-sm">
+          Sign out
+        </a>
+      </div>
+    </header>
 
-    <div class="admin-content">
+    {# Flash messages container inside admin #}
+    {% include "partials/flash_messages.html" %}
+
+    <main class="admin-content" id="adminContent">
       {% block content %}{% endblock %}
-    </div>
+    </main>
 
-    <footer class="site-footer" style="margin-left:0;">
+    {# Compliance footer required on every page #}
+    <footer class="site-footer" style="margin-left: 0;">
       Educational project only. Verify current import requirements with official Indian authorities before making any real import decision.
     </footer>
   </div>

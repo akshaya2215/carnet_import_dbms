@@ -1,100 +1,118 @@
 {% extends "base.html" %}
-{% block title %}Eligibility result — Application #{{ app.application_id }}{% endblock %}
+{% import "macros/components.html" as ui %}
+
+{% block title %}Eligibility Evaluation Certificate — Application #{{ app.application_id }}{% endblock %}
 
 {% block content %}
 
+{# Breadcrumb navigation #}
 <div class="mb-3">
   <nav aria-label="breadcrumb">
-    <ol class="breadcrumb" style="font-size:.8125rem;">
+    <ol class="breadcrumb mb-0" style="font-size: 0.8125rem;">
       <li class="breadcrumb-item"><a href="{{ url_for('index') }}">Home</a></li>
-      <li class="breadcrumb-item active">Result #{{ app.application_id }}</li>
+      <li class="breadcrumb-item active" aria-current="page">Evaluation #{{ "%04d"|format(app.application_id) if app.application_id < 1000 else app.application_id }}</li>
     </ol>
   </nav>
 </div>
 
-{# ── Result banner ───────────────────────────────────────── #}
+{# ── Result Banner (Centerpiece) ─────────────────────────── #}
 {% if result.overall_result == 'PASSED' %}
-<div class="result-banner passed mb-4">
+<div class="result-banner passed">
   <div class="result-banner-icon" aria-hidden="true">✓</div>
-  <div>
-    <div class="result-banner-title">Eligible for import</div>
+  <div class="flex-grow-1">
+    <div class="result-banner-title">Eligible for Import</div>
     <div class="result-banner-meta">
-      Application #{{ app.application_id }} &nbsp;·&nbsp; Evaluated {{ result.evaluation_date }}
-      &nbsp;·&nbsp; All {{ rule_evals|length }} active rules passed
+      Application #{{ "%04d"|format(app.application_id) if app.application_id < 1000 else app.application_id }}
+      &nbsp;·&nbsp; Evaluated on {{ result.evaluation_date }}
+      &nbsp;·&nbsp; All {{ rule_evals|length }} statutory compliance rules satisfied
     </div>
   </div>
-  <button onclick="window.print()" class="btn btn-secondary btn-sm ms-auto btn-print" style="flex-shrink:0;">
-    <svg class="me-1" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 9V2h12v7M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
-    Print report
+  <button onclick="window.print()" class="btn btn-secondary btn-print ms-auto" aria-label="Print compliance certificate">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9V2h12v7M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+    <span>Print report</span>
   </button>
 </div>
 {% else %}
-<div class="result-banner failed mb-4">
+<div class="result-banner failed">
   <div class="result-banner-icon" aria-hidden="true">✕</div>
-  <div>
-    <div class="result-banner-title">Not eligible for import</div>
+  <div class="flex-grow-1">
+    <div class="result-banner-title">Not Eligible for Import</div>
     <div class="result-banner-meta">
-      Application #{{ app.application_id }} &nbsp;·&nbsp; Evaluated {{ result.evaluation_date }}
+      Application #{{ "%04d"|format(app.application_id) if app.application_id < 1000 else app.application_id }}
+      &nbsp;·&nbsp; Evaluated on {{ result.evaluation_date }}
       {% set fails = rule_evals|selectattr('outcome','equalto','FAIL')|list %}
-      &nbsp;·&nbsp; {{ fails|length }} rule{{ 's' if fails|length != 1 }} failed
+      &nbsp;·&nbsp; {{ fails|length }} non-compliant rule{{ 's' if fails|length != 1 else '' }} detected
     </div>
     {% if result.summary_reason %}
-    <div class="mt-2" style="font-size:.875rem;color:var(--c-danger);">{{ result.summary_reason }}</div>
+    <div class="result-summary-reason">{{ result.summary_reason }}</div>
     {% endif %}
   </div>
-  <button onclick="window.print()" class="btn btn-secondary btn-sm ms-auto btn-print" style="flex-shrink:0;">
-    <svg class="me-1" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 9V2h12v7M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
-    Print report
+  <button onclick="window.print()" class="btn btn-secondary btn-print ms-auto" aria-label="Print non-compliance certificate">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9V2h12v7M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+    <span>Print report</span>
   </button>
 </div>
 {% endif %}
 
-{# ── Applicant + Vehicle details ─────────────────────────── #}
+{# ── Applicant & Vehicle Details Definition Lists ─────────── #}
 <div class="row g-3 mb-4">
-  <div class="col-md-5">
-    <div class="app-card h-100">
-      <div class="app-card-header"><h3>Applicant</h3></div>
+  <div class="col-lg-5">
+    <div class="app-card h-100 mb-0">
+      <div class="app-card-header">
+        <h3>Applicant details</h3>
+        <span class="badge badge-info">{{ app.import_type.replace('_',' ').title() }}</span>
+      </div>
       <div class="app-card-body">
         <dl class="def-list">
           <dt>Full name</dt>
-          <dd>{{ app.full_name }}</dd>
+          <dd class="fw-600">{{ app.full_name }}</dd>
+
           <dt>Passport</dt>
           <dd class="mono">{{ app.passport_number }}</dd>
+
           {% if app.email %}
           <dt>Email</dt>
           <dd>{{ app.email }}</dd>
           {% endif %}
-          <dt>Import category</dt>
-          <dd><span class="badge badge-inactive">{{ app.import_type.replace('_',' ').title() }}</span></dd>
-          <dt>Application date</dt>
-          <dd>{{ app.application_date }}</dd>
+
+          <dt>Submission date</dt>
+          <dd class="text-muted">{{ app.application_date }}</dd>
         </dl>
       </div>
     </div>
   </div>
-  <div class="col-md-7">
-    <div class="app-card h-100">
-      <div class="app-card-header"><h3>Vehicle</h3></div>
+
+  <div class="col-lg-7">
+    <div class="app-card h-100 mb-0">
+      <div class="app-card-header">
+        <h3>Vehicle specifications</h3>
+        <span class="mono text-muted" style="font-size: 0.8125rem;">VIN: {{ app.vin }}</span>
+      </div>
       <div class="app-card-body">
-        <dl class="def-list" style="grid-template-columns:auto 1fr;column-gap:1.5rem;">
-          <dt>VIN</dt>
-          <dd class="mono">{{ app.vin }}</dd>
-          <dt>Manufacturer</dt>
-          <dd>{{ app.manufacturer }}</dd>
-          <dt>Model</dt>
-          <dd>{{ app.model }}</dd>
-          <dt>Year</dt>
-          <dd>{{ app.manufacture_year }}</dd>
-          <dt>Fuel</dt>
-          <dd>{{ app.fuel_type }}</dd>
-          <dt>Engine</dt>
-          <dd>{% if app.engine_cc and app.engine_cc != 0 %}{{ app.engine_cc }} cc{% else %}N/A (electric){% endif %}</dd>
-          <dt>Steering</dt>
-          <dd>{{ app.steering_side }}-hand drive</dd>
-          <dt>Origin</dt>
+        <dl class="def-list" style="grid-template-columns: auto 1fr;">
+          <dt>Manufacturer &amp; Model</dt>
+          <dd class="fw-600">{{ app.manufacturer }} {{ app.model }}</dd>
+
+          <dt>Year &amp; Fuel</dt>
+          <dd>{{ app.manufacture_year }} · {{ app.fuel_type }}</dd>
+
+          <dt>Engine capacity</dt>
+          <dd>{% if app.engine_cc and app.engine_cc != 0 %}{{ app.engine_cc }} cc{% else %}N/A (Electric vehicle){% endif %}</dd>
+
+          <dt>Steering configuration</dt>
+          <dd>
+            {% if app.steering_side == 'RIGHT' %}
+              <span class="badge badge-eligible">Right-hand drive</span>
+            {% else %}
+              <span class="badge badge-rejected">Left-hand drive</span>
+            {% endif %}
+          </dd>
+
+          <dt>Origin / Export country</dt>
           <dd>{{ app.origin_country }}</dd>
+
           {% if app.carnet_number %}
-          <dt>Carnet</dt>
+          <dt>Carnet CPD</dt>
           <dd class="mono">{{ app.carnet_number }} <span class="text-muted">(expires {{ app.carnet_expiry }})</span></dd>
           {% endif %}
         </dl>
@@ -103,40 +121,38 @@
   </div>
 </div>
 
-{# ── Rule evaluation table ────────────────────────────────── #}
-<div class="app-card">
+{# ── Rule-by-Rule Evaluation Table ────────────────────────── #}
+<div class="app-card mb-4">
   <div class="app-card-header">
-    <h3>Rule evaluation</h3>
-    <span class="text-muted" style="font-size:.8125rem;">Result ID: {{ result.result_id }}</span>
+    <h3>Statutory rule evaluation</h3>
+    <span class="text-muted" style="font-size: 0.8125rem;">Evaluation Record ID: <span class="mono">#{{ result.result_id }}</span></span>
   </div>
   <div class="app-card-body p-0">
     <div class="table-scroll">
-      <table class="table mb-0" id="ruleTable">
+      <table class="table mb-0" id="ruleEvaluationTable">
         <thead>
           <tr>
-            <th>Rule</th>
-            <th>Type</th>
+            <th>Statutory rule</th>
+            <th>Check type</th>
             <th>Requirement</th>
             <th>Actual value</th>
-            <th>Outcome</th>
-            <th>Note</th>
+            <th>Evaluation outcome</th>
+            <th>Compliance note</th>
           </tr>
         </thead>
         <tbody>
           {% for ev in rule_evals %}
-          <tr {% if ev.outcome == 'FAIL' %}style="background:var(--c-danger-bg);"{% endif %}>
+          <tr {% if ev.outcome == 'FAIL' %}style="background-color: var(--c-danger-bg);"{% endif %}>
             <td class="fw-600">{{ ev.rule_name }}</td>
-            <td><span class="badge badge-inactive" style="font-size:.65rem;text-transform:uppercase;letter-spacing:.03em;">{{ ev.rule_type.replace('_',' ') }}</span></td>
-            <td class="mono">{{ ev.operator }} {{ ev.expected_value }}</td>
-            <td class="mono">{{ ev.actual_value or '—' }}</td>
             <td>
-              {% if ev.outcome == 'PASS' %}
-                <span class="badge badge-eligible">Pass</span>
-              {% else %}
-                <span class="badge badge-rejected">Fail</span>
-              {% endif %}
+              <span class="badge badge-inactive">{{ ev.rule_type.replace('_',' ').title() }}</span>
             </td>
-            <td class="text-muted" style="font-size:.8125rem;max-width:22ch;">{{ ev.message or '' }}</td>
+            <td class="mono">{{ ev.operator }} {{ ev.expected_value }}</td>
+            <td class="mono fw-500">{{ ev.actual_value or '—' }}</td>
+            <td>{{ ui.status_badge(ev.outcome) }}</td>
+            <td class="text-muted" style="font-size: 0.8125rem; max-width: 32ch;">
+              {{ ev.message or 'Requirement fulfilled.' }}
+            </td>
           </tr>
           {% endfor %}
         </tbody>
@@ -145,9 +161,14 @@
   </div>
 </div>
 
-<div class="mt-4 d-flex gap-2">
-  <a href="{{ url_for('check') }}" class="btn btn-primary">New check</a>
-  <a href="{{ url_for('index') }}" class="btn btn-secondary">Home</a>
+{# Actions Footer #}
+<div class="d-flex align-items-center gap-2">
+  <a href="{{ url_for('check') }}" class="btn btn-primary">
+    + Check another vehicle
+  </a>
+  <a href="{{ url_for('index') }}" class="btn btn-secondary">
+    Return to overview
+  </a>
 </div>
 
 {% endblock %}

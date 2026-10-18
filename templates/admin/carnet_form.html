@@ -1,48 +1,75 @@
 {% extends "admin/base_admin.html" %}
-{% block title %}{{ action }} Carnet – Admin{% endblock %}
+
+{% block title %}{{ action }} Carnet — Customs Admin{% endblock %}
 {% block page_title %}{{ action }} Carnet{% endblock %}
+
 {% block content %}
-<div class="card" style="max-width:550px;">
-  <div class="card-header py-3">{{ action }} Carnet</div>
-  <div class="card-body">
-    <form method="POST">
-      <div class="row g-3">
-        <div class="col-12">
-          <label class="form-label fw-600">Carnet Number *</label>
-          <input type="text" name="carnet_number" class="form-control" required value="{{ carnet.carnet_number if carnet else '' }}">
-        </div>
-        <div class="col-12">
-          <label class="form-label fw-600">Issuing Country *</label>
-          <select name="issuing_country_id" class="form-select" required>
-            {% for c in countries %}
-            <option value="{{ c.country_id }}" {% if carnet and carnet.issuing_country_id==c.country_id %}selected{% endif %}>{{ c.country_name }}</option>
-            {% endfor %}
-          </select>
-        </div>
-        <div class="col-md-6">
-          <label class="form-label fw-600">Issue Date *</label>
-          <input type="date" name="issue_date" class="form-control" required value="{{ carnet.issue_date if carnet else '' }}">
-        </div>
-        <div class="col-md-6">
-          <label class="form-label fw-600">Expiry Date *</label>
-          <input type="date" name="expiry_date" class="form-control" required value="{{ carnet.expiry_date if carnet else '' }}">
-        </div>
-        {% if carnet %}
-        <div class="col-12">
-          <label class="form-label fw-600">Status</label>
-          <select name="status" class="form-select">
-            <option {% if carnet.status=='ACTIVE' %}selected{% endif %}>ACTIVE</option>
-            <option {% if carnet.status=='EXPIRED' %}selected{% endif %}>EXPIRED</option>
-            <option {% if carnet.status=='CANCELLED' %}selected{% endif %}>CANCELLED</option>
-          </select>
-        </div>
-        {% endif %}
-        <div class="col-12 d-flex gap-2 justify-content-end">
-          <a href="{{ url_for('admin_carnets') }}" class="btn btn-secondary">Cancel</a>
-          <button class="btn btn-primary">{{ action }}</button>
-        </div>
+<div class="row justify-content-center">
+  <div class="col-lg-6">
+    <div class="mb-3">
+      <a href="{{ url_for('admin_carnets') }}" class="btn btn-secondary btn-sm">
+        ← Back to carnets register
+      </a>
+    </div>
+
+    <div class="app-card">
+      <div class="app-card-header">
+        <h3>{{ action }} Carnet de Passages (CPD) record</h3>
       </div>
-    </form>
+      <div class="app-card-body">
+        <form method="POST" novalidate>
+          <div class="row g-3">
+            <div class="col-12">
+              <label class="form-label" for="carnet_number">Carnet document number <span class="text-danger">*</span></label>
+              <input type="text" name="carnet_number" id="carnet_number" class="form-control mono text-uppercase" required
+                     value="{{ carnet.carnet_number if carnet else '' }}" placeholder="e.g. CPD-UK-2024-001">
+            </div>
+            <div class="col-12">
+              <label class="form-label" for="issuing_country_id">Issuing country <span class="text-danger">*</span></label>
+              <select name="issuing_country_id" id="issuing_country_id" class="form-select" required>
+                <option value="">Select issuing country…</option>
+                {% for c in countries %}
+                <option value="{{ c.country_id }}" {% if carnet and carnet.issuing_country_id == c.country_id %}selected{% endif %}>
+                  {{ c.country_name }}
+                </option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label" for="issue_date">Issue date <span class="text-danger">*</span></label>
+              <input type="date" name="issue_date" id="issue_date" class="form-control" required
+                     value="{{ carnet.issue_date if carnet else '' }}">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label" for="expiry_date">Expiry date <span class="text-danger">*</span></label>
+              <input type="date" name="expiry_date" id="expiry_date" class="form-control" required
+                     value="{{ carnet.expiry_date if carnet else '' }}">
+              <div class="form-text">Must be valid through import stay.</div>
+            </div>
+
+            {% if carnet %}
+            <div class="col-12">
+              <label class="form-label" for="status">Carnet status</label>
+              <select name="status" id="status" class="form-select">
+                <option value="ACTIVE" {% if carnet.status == 'ACTIVE' %}selected{% endif %}>ACTIVE</option>
+                <option value="EXPIRED" {% if carnet.status == 'EXPIRED' %}selected{% endif %}>EXPIRED</option>
+                <option value="CANCELLED" {% if carnet.status == 'CANCELLED' %}selected{% endif %}>CANCELLED</option>
+              </select>
+            </div>
+            {% endif %}
+          </div>
+
+          <div class="d-flex justify-content-end gap-2 mt-4 pt-3" style="border-top: var(--border);">
+            <a href="{{ url_for('admin_carnets') }}" class="btn btn-secondary">
+              Cancel
+            </a>
+            <button type="submit" class="btn btn-primary px-4">
+              {{ action }} carnet
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
   </div>
 </div>
 {% endblock %}

@@ -1,47 +1,80 @@
 {% extends "admin/base_admin.html" %}
-{% block title %}Result #{{ result.result_id }} Detail – Admin{% endblock %}
-{% block page_title %}Result #{{ result.result_id }} Detail{% endblock %}
+{% import "macros/components.html" as ui %}
+
+{% block title %}Result Detail #{{ result.result_id }} — Customs Admin{% endblock %}
+{% block page_title %}Evaluation Record #{{ result.result_id }}{% endblock %}
+
 {% block content %}
+<div class="mb-3">
+  <a href="{{ url_for('admin_results') }}" class="btn btn-secondary btn-sm">
+    ← Back to results register
+  </a>
+</div>
+
 <div class="row g-3 mb-4">
-  <div class="col-md-6">
-    <div class="card">
-      <div class="card-header py-3 {% if result.overall_result=='PASSED' %}bg-success{% else %}bg-danger{% endif %} text-white fw-700">
-        {{ result.overall_result }}
+  <div class="col-lg-6">
+    <div class="app-card h-100 mb-0">
+      <div class="app-card-header d-flex justify-content-between align-items-center">
+        <h3>Evaluation summary</h3>
+        {{ ui.status_badge(result.overall_result) }}
       </div>
-      <div class="card-body">
-        <table class="table table-borderless table-sm mb-0">
-          <tr><td class="text-muted">Application</td><td><a href="{{ url_for('result', application_id=result.application_id) }}" target="_blank">#{{ result.application_id }}</a></td></tr>
-          <tr><td class="text-muted">Applicant</td><td class="fw-600">{{ result.full_name }}</td></tr>
-          <tr><td class="text-muted">Vehicle</td><td>{{ result.model }}</td></tr>
-          <tr><td class="text-muted">Evaluated</td><td>{{ result.evaluation_date }}</td></tr>
-          <tr><td class="text-muted">Summary</td><td class="small">{{ result.summary_reason or '—' }}</td></tr>
-        </table>
+      <div class="app-card-body">
+        <dl class="def-list" style="grid-template-columns: auto 1fr;">
+          <dt>Application</dt>
+          <dd class="mono">
+            <a href="{{ url_for('result', application_id=result.application_id) }}" target="_blank" rel="noopener">
+              #{{ result.application_id }} ↗
+            </a>
+          </dd>
+
+          <dt>Applicant</dt>
+          <dd class="fw-600">{{ result.full_name }}</dd>
+
+          <dt>Vehicle model</dt>
+          <dd>{{ result.model }}</dd>
+
+          <dt>Evaluated date</dt>
+          <dd class="text-muted">{{ result.evaluation_date }}</dd>
+
+          <dt>Summary note</dt>
+          <dd class="{% if result.overall_result != 'PASSED' %}text-danger{% endif %}">
+            {{ result.summary_reason or 'All statutory rules complied with.' }}
+          </dd>
+        </dl>
       </div>
     </div>
   </div>
 </div>
 
-<div class="card">
-  <div class="card-header fw-700 py-3"><i class="bi bi-list-check me-2"></i>Per-Rule Evaluation</div>
-  <div class="card-body p-0">
-    <table class="table table-hover mb-0">
-      <thead class="table-light"><tr><th>Rule</th><th>Type</th><th>Actual Value</th><th>Outcome</th><th>Message</th></tr></thead>
-      <tbody>
-        {% for e in evals %}
-        <tr class="{% if e.outcome=='PASS' %}table-success{% else %}table-danger{% endif %}">
-          <td class="fw-600">{{ e.rule_name }}</td>
-          <td><span class="badge bg-secondary">{{ e.rule_type }}</span></td>
-          <td class="font-monospace">{{ e.actual_value or 'N/A' }}</td>
-          <td>{% if e.outcome=='PASS' %}<span class="badge-pass">PASS</span>{% else %}<span class="badge-fail">FAIL</span>{% endif %}</td>
-          <td class="small text-muted">{{ e.message }}</td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
+<div class="app-card">
+  <div class="app-card-header">
+    <h3>Per-rule evaluation audit</h3>
   </div>
-</div>
-
-<div class="mt-3">
-  <a href="{{ url_for('admin_results') }}" class="btn btn-secondary btn-sm"><i class="bi bi-arrow-left me-1"></i>Back to Results</a>
+  <div class="app-card-body p-0">
+    <div class="table-scroll">
+      <table class="table mb-0">
+        <thead>
+          <tr>
+            <th>Statutory rule</th>
+            <th>Type</th>
+            <th>Evaluated value</th>
+            <th>Outcome</th>
+            <th>Message</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for e in evals %}
+          <tr {% if e.outcome == 'FAIL' %}style="background-color: var(--c-danger-bg);"{% endif %}>
+            <td class="fw-600">{{ e.rule_name }}</td>
+            <td><span class="badge badge-inactive">{{ e.rule_type.replace('_',' ').title() }}</span></td>
+            <td class="mono fw-500">{{ e.actual_value or '—' }}</td>
+            <td>{{ ui.status_badge(e.outcome) }}</td>
+            <td class="text-muted" style="font-size: 0.8125rem;">{{ e.message or 'Requirement met.' }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
 </div>
 {% endblock %}

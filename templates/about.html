@@ -1,86 +1,122 @@
 {% extends "base.html" %}
-{% block title %}About — India Vehicle Import Eligibility{% endblock %}
+
+{% block title %}About — Vehicle Import Compliance Engine{% endblock %}
+{% block meta_desc %}Educational project architecture, database design principles, and comprehensive SQL concepts demonstrated.{% endblock %}
 
 {% block content %}
 <div class="row justify-content-center">
-<div class="col-lg-8">
+  <div class="col-lg-9">
 
-  <div class="mb-4">
-    <h1 class="mb-1">About this system</h1>
-    <p class="text-muted" style="font-size:.9375rem;">University DBMS project — Indian Vehicle Import Eligibility &amp; Carnet Management</p>
-  </div>
+    {# Page Header #}
+    <div class="mb-4">
+      <nav aria-label="breadcrumb">
+        <ol class="breadcrumb mb-2" style="font-size: 0.8125rem;">
+          <li class="breadcrumb-item"><a href="{{ url_for('index') }}">Home</a></li>
+          <li class="breadcrumb-item active" aria-current="page">About</li>
+        </ol>
+      </nav>
+      <h1 class="mb-1">About the compliance system</h1>
+      <p class="text-muted mb-0" style="font-size: 0.9375rem; max-width: 65ch;">
+        Relational DBMS educational project — Indian Vehicle Import Eligibility &amp; CPD Carnet Management Portal.
+      </p>
+    </div>
 
-  <div class="app-card mb-3">
-    <div class="app-card-header"><h3>Purpose</h3></div>
-    <div class="app-card-body">
-      <p>This system demonstrates how a relational database — not application code — can be the authoritative decision engine for a compliance workflow. A MySQL stored procedure evaluates every active rule and records a pass or fail per rule. Flask renders the output; no eligibility logic lives in Python.</p>
-      <p>The primary subject is the Carnet de Passages en Douane (CPD), an international customs document that lets a vehicle be temporarily imported without paying full import duties, recognised in over 100 AIT/FIA member countries including India.</p>
-      <div class="alert alert-warning mt-3 mb-0">
-        <strong>Disclaimer.</strong> This is an educational project. Always verify requirements with official Indian authorities (DGFT, Customs, Ministry of Road Transport) before any real import.
+    {# 1. Project Purpose #}
+    <div class="app-card mb-4">
+      <div class="app-card-header">
+        <h3>System purpose &amp; architecture</h3>
+      </div>
+      <div class="app-card-body">
+        <p>
+          This application demonstrates how a relational database management system — rather than application layer code — acts as the authoritative decision engine for an institutional customs compliance workflow.
+        </p>
+        <p>
+          A MySQL stored procedure (<code class="mono">CheckEligibility</code>) iterates through active statutory criteria, parses relational requirements via cursors and conditional statements, and logs per-rule compliance outcomes directly to relational audit tables. Flask serves as a lightweight interface; all eligibility business logic is encapsulated in SQL routines and triggers.
+        </p>
+        <p class="mb-0">
+          The subject matter models the <strong>Carnet de Passages en Douane (CPD)</strong>, an internationally recognised customs transit permit coordinated by the AIT/FIA allowing temporary motor vehicle importation without payment of normal customs duties and taxes across 100+ contracting states, including India.
+        </p>
       </div>
     </div>
-  </div>
 
-  <div class="app-card mb-3">
-    <div class="app-card-header"><h3>Technology stack</h3></div>
-    <div class="app-card-body">
-      <div class="row g-3">
-        <div class="col-sm-6">
-          <div class="text-muted" style="font-size:.75rem;font-weight:600;text-transform:uppercase;letter-spacing:.06em;margin-bottom:.5rem;">Database</div>
-          <ul class="list-unstyled mb-0" style="font-size:.9rem;">
-            <li class="mb-1">MySQL 8.0 · InnoDB</li>
-            <li class="mb-1">14 tables in 3NF</li>
-            <li class="mb-1">Stored function + procedure</li>
-            <li class="mb-1">5 triggers · 5 views</li>
-          </ul>
-        </div>
-        <div class="col-sm-6">
-          <div class="text-muted" style="font-size:.75rem;font-weight:600;text-transform:uppercase;letter-spacing:.06em;margin-bottom:.5rem;">Application</div>
-          <ul class="list-unstyled mb-0" style="font-size:.9rem;">
-            <li class="mb-1">Python 3.11 · Flask</li>
-            <li class="mb-1">mysql-connector-python</li>
-            <li class="mb-1">Bootstrap 5 · IBM Plex Sans</li>
-            <li class="mb-1">Werkzeug password hashing</li>
-          </ul>
+    {# 2. Technology Stack #}
+    <div class="app-card mb-4">
+      <div class="app-card-header">
+        <h3>Technology stack</h3>
+      </div>
+      <div class="app-card-body">
+        <div class="row g-4">
+          <div class="col-md-6">
+            <h4 style="font-size: 0.875rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--c-navy);">
+              Database Architecture
+            </h4>
+            <ul class="list-unstyled mb-0" style="font-size: 0.9375rem; line-height: 1.8;">
+              <li><strong>Engine:</strong> MySQL 8.0 · InnoDB</li>
+              <li><strong>Schema:</strong> 14 normalized tables in Third Normal Form (3NF)</li>
+              <li><strong>Routines:</strong> Stored function (<code class="mono">CalculateVehicleAge</code>) &amp; stored procedure (<code class="mono">CheckEligibility</code>)</li>
+              <li><strong>Integrity:</strong> 5 active triggers &amp; 5 database views</li>
+            </ul>
+          </div>
+          <div class="col-md-6">
+            <h4 style="font-size: 0.875rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--c-navy);">
+              Application &amp; Interface
+            </h4>
+            <ul class="list-unstyled mb-0" style="font-size: 0.9375rem; line-height: 1.8;">
+              <li><strong>Backend:</strong> Python 3.11 · Flask</li>
+              <li><strong>Driver:</strong> <code class="mono">mysql-connector-python</code> with parameterised queries</li>
+              <li><strong>Security:</strong> Werkzeug PBKDF2 password hashing &amp; scoped sessions</li>
+              <li><strong>Typography &amp; UI:</strong> IBM Plex Sans &amp; IBM Plex Mono</li>
+            </ul>
+          </div>
         </div>
       </div>
     </div>
-  </div>
 
-  <div class="app-card mb-3">
-    <div class="app-card-header"><h3>SQL concepts demonstrated</h3></div>
-    <div class="app-card-body p-0">
-      <table class="table mb-0">
-        <thead><tr><th>Concept</th><th>Where used</th></tr></thead>
-        <tbody>
-          {% for concept, where in [
-            ('DDL — CREATE, DROP, ALTER', 'sql/01_schema.sql — 14 tables, indexes, foreign keys'),
-            ('Stored function', 'CalculateVehicleAge() — sql/02_functions_procedures.sql'),
-            ('Stored procedure', 'CheckEligibility() — cursor, CASE, SIGNAL'),
-            ('Cursor', 'Loop over active rules inside CheckEligibility'),
-            ('CASE expression', 'Operator evaluation inside procedure; age category in reports'),
-            ('SIGNAL', 'Raises an error if application is not found'),
-            ('Triggers (BEFORE / AFTER)', '5 triggers — sql/03_triggers.sql'),
-            ('Views', '5 views — sql/04_views.sql'),
-            ('INNER JOIN + LEFT JOIN', '6-table join on the application report'),
-            ('GROUP BY / HAVING', 'Applications per country, filter count > 2'),
-            ('Subquery', 'Vehicles older than the average manufacture year'),
-            ('EXISTS / NOT EXISTS', 'Applications missing mandatory documents'),
-            ('Transaction (COMMIT / ROLLBACK)', 'Flask wraps every submission in one transaction'),
-            ('Parameterised queries', 'All queries use %s placeholders — no string formatting'),
-            ('Indexes', '5 additional indexes on vin, passport, carnet, status'),
-            ('3NF normalisation', 'Justified in comment block at top of sql/01_schema.sql'),
-          ] %}
-          <tr>
-            <td><span class="concept-tag">{{ concept }}</span></td>
-            <td class="text-muted" style="font-size:.8125rem;">{{ where }}</td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
+    {# 3. SQL Concepts Demonstrated #}
+    <div class="app-card mb-4">
+      <div class="app-card-header">
+        <h3>SQL concepts demonstrated</h3>
+        <span class="badge badge-info">16 Core Concepts</span>
+      </div>
+      <div class="app-card-body p-0">
+        <div class="table-scroll">
+          <table class="table mb-0">
+            <thead>
+              <tr>
+                <th style="width: 28%;">Relational SQL Concept</th>
+                <th>Implementation &amp; File Reference</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for concept, where in [
+                ('DDL — CREATE, DROP, ALTER', 'sql/01_schema.sql — 14 tables, compound primary keys, relational foreign keys'),
+                ('Stored function', 'CalculateVehicleAge() — calculates accurate integer year delta in sql/02_functions_procedures.sql'),
+                ('Stored procedure', 'CheckEligibility() — evaluates active rules with conditional cursors and SIGNAL in sql/02_functions_procedures.sql'),
+                ('Cursor iteration', 'DECLARE ... CURSOR FOR selecting active rules inside CheckEligibility'),
+                ('CASE expressions', 'Operator evaluation inside procedure; age categorization in sql/04_views.sql'),
+                ('SIGNAL SQLSTATE', 'Throws exception 45000 if an application reference is not found in database'),
+                ('Triggers (BEFORE & AFTER)', '5 triggers enforcing audit logs, carnet dates, and document counts in sql/03_triggers.sql'),
+                ('Database views', '5 views providing abstraction layers for reports, summary statistics, and active rules'),
+                ('INNER & LEFT JOINs', 'Multi-table join across application, applicant, vehicle, manufacturer, country, and carnet'),
+                ('GROUP BY & HAVING', 'Aggregates import applications by country filtering for volumes >= 2 in reports'),
+                ('Nested subqueries', 'Identifies vehicles older than the fleet average manufacture year'),
+                ('EXISTS & NOT EXISTS', 'Identifies applications missing required statutory compliance documents'),
+                ('Transactions (ACID)', 'Atomic submission wrapping applicant, vehicle, carnet, and procedure execution'),
+                ('Parameterised statements', '100% parameterised SQL using %s placeholders against SQL injection'),
+                ('Secondary index optimization', 'Targeted B-tree indexes on VIN, passport number, carnet number, and application status'),
+                ('3NF schema normalisation', 'Rigorous separation of vehicle attributes, manufacturers, issuing bodies, and submitted documents')
+              ] %}
+              <tr>
+                <td><span class="concept-tag">{{ concept }}</span></td>
+                <td class="text-muted" style="font-size: 0.8125rem;">{{ where }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
-  </div>
 
-</div>
+  </div>
 </div>
 {% endblock %}

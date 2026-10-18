@@ -1,45 +1,61 @@
 {% extends "admin/base_admin.html" %}
-{% block title %}Results — Admin{% endblock %}
-{% block page_title %}Eligibility results{% endblock %}
+{% import "macros/components.html" as ui %}
+
+{% block title %}Eligibility Evaluation Results Register — Admin{% endblock %}
+{% block page_title %}Results{% endblock %}
 
 {% block content %}
 <div class="table-toolbar">
-  <input type="text" class="form-control search-box" placeholder="Search results…"
-         data-search-table="resultsTable" aria-label="Search">
+  <div class="d-flex align-items-center gap-2 flex-grow-1">
+    <input type="text" class="form-control search-box" placeholder="Search results by applicant, vehicle, outcome…"
+           data-search-table="resultsTable" aria-label="Search results">
+  </div>
 </div>
+
 <div class="app-card">
   <div class="app-card-body p-0">
-    {% if rows %}
+    {% set item_list = results or rows %}
+    {% if item_list %}
     <div class="table-scroll">
       <table class="table mb-0" id="resultsTable">
         <thead>
-          <tr><th>Result #</th><th>Application</th><th>Applicant</th><th>Vehicle</th><th>Evaluated</th><th>Outcome</th><th></th></tr>
+          <tr>
+            <th>Result ID</th>
+            <th>Application</th>
+            <th>Applicant</th>
+            <th>Vehicle model</th>
+            <th>Evaluation date</th>
+            <th>Overall outcome</th>
+            <th class="text-end no-export">Actions</th>
+          </tr>
         </thead>
         <tbody>
-          {% for r in rows %}
+          {% for r in item_list %}
           <tr>
-            <td>{{ r.result_id }}</td>
-            <td class="fw-600">#{{ r.application_id }}</td>
-            <td>{{ r.full_name }}</td>
+            <td class="mono fw-600">#{{ "%04d"|format(r.result_id) if r.result_id < 1000 else r.result_id }}</td>
+            <td class="mono">
+              <a href="{{ url_for('admin_result_detail', rid=r.result_id) }}" class="fw-600">
+                #{{ "%04d"|format(r.application_id) if r.application_id < 1000 else r.application_id }}
+              </a>
+            </td>
+            <td class="fw-500">{{ r.full_name }}</td>
             <td>{{ r.model }}</td>
             <td class="text-muted">{{ r.evaluation_date }}</td>
-            <td>
-              {% if r.overall_result == 'PASSED' %}<span class="badge badge-eligible">Eligible</span>
-              {% else %}<span class="badge badge-rejected">Rejected</span>{% endif %}
+            <td>{{ ui.status_badge(r.overall_result) }}</td>
+            <td class="text-end no-export" style="white-space: nowrap;">
+              <a href="{{ url_for('admin_result_detail', rid=r.result_id) }}" class="btn btn-secondary btn-sm">
+                Details
+              </a>
+              <a href="{{ url_for('result', application_id=r.application_id) }}" target="_blank" rel="noopener"
+                 class="btn btn-secondary btn-sm">Certificate ↗</a>
             </td>
-            <td><a href="{{ url_for('result', application_id=r.application_id) }}" target="_blank"
-                   class="btn btn-secondary btn-sm">View ↗</a></td>
           </tr>
           {% endfor %}
         </tbody>
       </table>
     </div>
     {% else %}
-    <div class="empty-state">
-      <div class="empty-state-icon">📊</div>
-      <h4>No results yet</h4>
-      <p>Results are generated when a check is submitted via the public form.</p>
-    </div>
+      {{ ui.empty_state("📊", "No evaluation results on record", "Results are compiled whenever an application is checked against active statutory rules.") }}
     {% endif %}
   </div>
 </div>

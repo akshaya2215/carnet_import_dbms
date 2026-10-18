@@ -1,0 +1,75 @@
+{# templates/partials/admin_sidebar.html #}
+<nav class="sidebar" id="adminSidebar" aria-label="Admin navigation">
+  <a class="sidebar-brand" href="{{ url_for('admin_dashboard') }}">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <rect x="1" y="8" width="22" height="12" rx="2"/>
+      <path d="M5 8V6a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v2"/>
+      <circle cx="7" cy="17" r="1.5"/>
+      <circle cx="17" cy="17" r="1.5"/>
+    </svg>
+    <span>Vehicle Import</span>
+  </a>
+
+  <div class="sidebar-nav">
+    <a class="sidebar-link {% if request.endpoint == 'admin_dashboard' %}active{% endif %}" href="{{ url_for('admin_dashboard') }}">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+      <span>Overview</span>
+    </a>
+
+    <div class="sidebar-section-label">Records</div>
+    <a class="sidebar-link {% if 'vehicle' in request.endpoint and 'admin' in request.endpoint %}active{% endif %}" href="{{ url_for('admin_vehicles') }}">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="9" width="22" height="10" rx="2"/><path d="M5 9V7a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v2"/><circle cx="7" cy="16" r="1.5"/><circle cx="17" cy="16" r="1.5"/></svg>
+      <span>Vehicles</span>
+    </a>
+    <a class="sidebar-link {% if 'manufacturer' in request.endpoint %}active{% endif %}" href="{{ url_for('admin_manufacturers') }}">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18M5 21V7l7-4 7 4v14"/></svg>
+      <span>Manufacturers</span>
+    </a>
+    <a class="sidebar-link {% if 'countr' in request.endpoint %}active{% endif %}" href="{{ url_for('admin_countries') }}">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15 15 0 0 1 0 20M12 2a15 15 0 0 0 0 20"/></svg>
+      <span>Countries</span>
+    </a>
+    <a class="sidebar-link {% if 'applicant' in request.endpoint %}active{% endif %}" href="{{ url_for('admin_applicants') }}">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      <span>Applicants</span>
+    </a>
+    <a class="sidebar-link {% if 'carnet' in request.endpoint %}active{% endif %}" href="{{ url_for('admin_carnets') }}">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+      <span>Carnets</span>
+    </a>
+
+    <div class="sidebar-section-label">Processing</div>
+    <a class="sidebar-link {% if request.endpoint in ['admin_applications', 'admin_application_rerun'] %}active{% endif %}" href="{{ url_for('admin_applications') }}">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+      <span>Applications</span>
+    </a>
+    <a class="sidebar-link {% if 'document' in request.endpoint %}active{% endif %}" href="{{ url_for('admin_documents') }}">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+      <span>Documents</span>
+    </a>
+    <a class="sidebar-link {% if 'rule' in request.endpoint and 'audit' not in request.endpoint and 'result' not in request.endpoint %}active{% endif %}" href="{{ url_for('admin_rules') }}">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+      <span>Rules</span>
+    </a>
+    <a class="sidebar-link {% if 'result' in request.endpoint %}active{% endif %}" href="{{ url_for('admin_results') }}">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      <span>Results</span>
+    </a>
+    <a class="sidebar-link {% if request.endpoint == 'admin_auditlog' %}active{% endif %}" href="{{ url_for('admin_auditlog') }}">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      <span>Audit log</span>
+    </a>
+
+    <div class="sidebar-section-label">Insights</div>
+    <a class="sidebar-link {% if request.endpoint == 'admin_reports' %}active{% endif %}" href="{{ url_for('admin_reports') }}">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+      <span>Reports</span>
+    </a>
+  </div>
+
+  <div class="sidebar-footer">
+    <a href="{{ url_for('index') }}" target="_blank" rel="noopener">
+      ↗ Public compliance portal
+    </a>
+  </div>
+</nav>

@@ -1,45 +1,62 @@
 {% extends "admin/base_admin.html" %}
-{% block title %}Audit Log — Admin{% endblock %}
-{% block page_title %}Rule audit log{% endblock %}
+{% import "macros/components.html" as ui %}
+
+{% block title %}Statutory Rule Audit Trail — Admin{% endblock %}
+{% block page_title %}Audit log{% endblock %}
 
 {% block content %}
+<div class="table-toolbar">
+  <div class="d-flex align-items-center gap-2 flex-grow-1">
+    <input type="text" class="form-control search-box" placeholder="Search audit trail by rule, user, action…"
+           data-search-table="auditTable" aria-label="Search audit trail">
+  </div>
+  <div class="ms-auto">
+    <button class="btn btn-secondary btn-sm btn-export-csv" data-table="auditTable" aria-label="Export audit log as CSV">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      <span>Export CSV</span>
+    </button>
+  </div>
+</div>
 
 <div class="app-card">
-  <div class="app-card-header">
-    <h3>Rule change history</h3>
-    <button class="btn btn-secondary btn-sm btn-export-csv" data-table="auditTable">Export CSV</button>
-  </div>
   <div class="app-card-body p-0">
-    {% if rows %}
+    {% set item_list = logs or rows %}
+    {% if item_list %}
     <div class="table-scroll">
       <table class="table mb-0" id="auditTable">
         <thead>
           <tr>
-            <th>#</th>
-            <th>Rule</th>
-            <th>Action</th>
+            <th>Log ID</th>
+            <th>Rule designation</th>
+            <th>Trigger action</th>
             <th>Changed by</th>
-            <th>Changed at</th>
+            <th>Timestamp</th>
             <th>Previous value</th>
-            <th>New value</th>
+            <th>Updated value</th>
           </tr>
         </thead>
         <tbody>
-          {% for r in rows %}
+          {% for r in item_list %}
           <tr>
-            <td>{{ r.log_id }}</td>
+            <td class="mono fw-600">#{{ "%04d"|format(r.log_id) if r.log_id < 1000 else r.log_id }}</td>
             <td class="fw-600">{{ r.rule_name }}</td>
             <td>
-              {% if r.action == 'INSERT' %}<span class="badge badge-active">Created</span>
-              {% elif r.action == 'UPDATE' %}<span class="badge badge-pending">Updated</span>
-              {% else %}<span class="badge badge-rejected">{{ r.action }}</span>{% endif %}
+              {% if r.action == 'INSERT' %}
+                <span class="badge badge-eligible">Created</span>
+              {% elif r.action == 'UPDATE' %}
+                <span class="badge badge-warning">Updated</span>
+              {% elif r.action == 'DELETE' %}
+                <span class="badge badge-danger">Deleted</span>
+              {% else %}
+                <span class="badge badge-inactive">{{ r.action }}</span>
+              {% endif %}
             </td>
-            <td>{{ r.changed_by or 'system' }}</td>
-            <td class="text-muted">{{ r.changed_at }}</td>
-            <td class="mono" style="font-size:.8rem;max-width:22ch;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="{{ r.old_values }}">
+            <td class="fw-500">{{ r.changed_by or 'system' }}</td>
+            <td class="text-muted mono" style="font-size: 0.8125rem;">{{ r.changed_at }}</td>
+            <td class="mono" style="font-size: 0.8rem; max-width: 25ch; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="{{ r.old_values }}">
               {{ r.old_values or '—' }}
             </td>
-            <td class="mono" style="font-size:.8rem;max-width:22ch;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="{{ r.new_values }}">
+            <td class="mono" style="font-size: 0.8rem; max-width: 25ch; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="{{ r.new_values }}">
               {{ r.new_values or '—' }}
             </td>
           </tr>
@@ -48,11 +65,7 @@
       </table>
     </div>
     {% else %}
-    <div class="empty-state">
-      <div class="empty-state-icon">📋</div>
-      <h4>No audit entries</h4>
-      <p>The trigger writes an entry whenever a rule is created or modified.</p>
-    </div>
+      {{ ui.empty_state("📋", "No audit log entries recorded", "Database triggers automatically log changes whenever eligibility rules are created, updated, or removed.") }}
     {% endif %}
   </div>
 </div>

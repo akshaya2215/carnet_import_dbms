@@ -1,37 +1,56 @@
 {% extends "admin/base_admin.html" %}
-{% block title %}Countries — Admin{% endblock %}
+{% import "macros/components.html" as ui %}
+
+{% block title %}Countries Register — Admin{% endblock %}
 {% block page_title %}Countries{% endblock %}
 
 {% block content %}
 <div class="table-toolbar">
-  <input type="text" class="form-control search-box" placeholder="Search countries…"
-         data-search-table="countryTable" aria-label="Search">
+  <div class="d-flex align-items-center gap-2 flex-grow-1">
+    <input type="text" class="form-control search-box" placeholder="Search countries by name…"
+           data-search-table="countryTable" aria-label="Search countries">
+  </div>
   <div class="ms-auto">
-    <a href="{{ url_for('admin_country_add') }}" class="btn btn-primary btn-sm">+ Add country</a>
+    <a href="{{ url_for('admin_country_add') }}" class="btn btn-primary btn-sm">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      <span>Add country</span>
+    </a>
   </div>
 </div>
+
 <div class="app-card">
   <div class="app-card-body p-0">
-    {% if rows %}
+    {% set item_list = countries or rows %}
+    {% if item_list %}
     <div class="table-scroll">
       <table class="table mb-0" id="countryTable">
-        <thead><tr><th>Country</th><th>Driving side</th><th></th></tr></thead>
+        <thead>
+          <tr>
+            <th>Country name</th>
+            <th>Driving side</th>
+            <th class="text-end no-export">Actions</th>
+          </tr>
+        </thead>
         <tbody>
-          {% for r in rows %}
+          {% for r in item_list %}
           <tr>
             <td class="fw-600">{{ r.country_name }}</td>
             <td>
               {% if r.driving_side == 'LEFT' %}
-                <span class="badge badge-eligible">Left (India-compatible)</span>
+                <span class="badge badge-eligible">Left (India-compatible RHD)</span>
               {% else %}
-                <span class="badge badge-rejected">Right</span>
+                <span class="badge badge-inactive">Right (LHD)</span>
               {% endif %}
             </td>
-            <td style="white-space:nowrap;">
-              <a href="{{ url_for('admin_country_edit', cid=r.country_id) }}" class="btn btn-secondary btn-sm">Edit</a>
+            <td class="text-end no-export" style="white-space: nowrap;">
+              <a href="{{ url_for('admin_country_edit', cid=r.country_id) }}" class="btn btn-secondary btn-sm">
+                Edit
+              </a>
               <form method="POST" action="{{ url_for('admin_country_delete', cid=r.country_id) }}"
-                    class="d-inline" data-confirm="Delete country {{ r.country_name }}?">
-                <button type="submit" class="btn btn-outline-danger btn-sm">Delete</button>
+                    class="d-inline" data-confirm="Are you sure you want to delete country '{{ r.country_name }}'?">
+                <button type="submit" class="btn btn-outline-danger btn-sm">
+                  Delete
+                </button>
               </form>
             </td>
           </tr>
@@ -40,12 +59,7 @@
       </table>
     </div>
     {% else %}
-    <div class="empty-state">
-      <div class="empty-state-icon">🌍</div>
-      <h4>No countries yet</h4>
-      <p>Add the first country.</p>
-      <a href="{{ url_for('admin_country_add') }}" class="btn btn-primary btn-sm">Add country</a>
-    </div>
+      {{ ui.empty_state("🌍", "No countries registered", "Add countries for origin mapping and carnet issuance.", url_for('admin_country_add'), "Add country") }}
     {% endif %}
   </div>
 </div>

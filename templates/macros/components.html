@@ -1,0 +1,46 @@
+{# templates/macros/components.html #}
+
+{% macro status_badge(status) %}
+  {% set s = (status or '')|upper %}
+  {% if s in ['ELIGIBLE', 'PASSED', 'PASS', 'ACTIVE', '1', 'TRUE'] %}
+    <span class="badge badge-eligible">
+      <svg width="10" height="10" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2"><polyline points="2 6 5 9 10 3"/></svg>
+      {{ 'Eligible' if s in ['ELIGIBLE', 'PASSED'] else 'Pass' if s == 'PASS' else 'Active' if s in ['ACTIVE', '1'] else status }}
+    </span>
+  {% elif s in ['REJECTED', 'FAILED', 'FAIL', 'INACTIVE', '0', 'FALSE', 'EXPIRED'] %}
+    <span class="badge badge-rejected">
+      <svg width="10" height="10" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2"><line x1="2" y1="2" x2="10" y2="10"/><line x1="10" y1="2" x2="2" y2="10"/></svg>
+      {{ 'Rejected' if s in ['REJECTED', 'FAILED'] else 'Fail' if s == 'FAIL' else 'Expired' if s == 'EXPIRED' else 'Inactive' if s in ['INACTIVE', '0'] else status }}
+    </span>
+  {% elif s in ['PENDING', 'PROCESSING', 'UNDER_REVIEW'] %}
+    <span class="badge badge-pending">
+      <svg width="10" height="10" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2"><circle cx="6" cy="6" r="4"/><polyline points="6 4 6 6 7.5 7.5"/></svg>
+      {{ status.replace('_', ' ').title() }}
+    </span>
+  {% else %}
+    <span class="badge badge-inactive">{{ status.replace('_', ' ').title() if status else '—' }}</span>
+  {% endif %}
+{% endmacro %}
+
+{% macro empty_state(icon, title, message, action_url='', action_text='') %}
+  <div class="empty-state">
+    <div class="empty-state-icon" aria-hidden="true">{{ icon }}</div>
+    <h4>{{ title }}</h4>
+    <p>{{ message }}</p>
+    {% if action_url and action_text %}
+      <a href="{{ action_url }}" class="btn btn-primary btn-sm">{{ action_text }}</a>
+    {% endif %}
+  </div>
+{% endmacro %}
+
+{% macro kpi_tile(label, value, color='', note='') %}
+  <div class="kpi-tile">
+    <div class="kpi-tile-value" {% if color %}style="color: {{ color }};"{% endif %}>
+      {{ value if value is not none else '0' }}
+    </div>
+    <div class="kpi-tile-label">{{ label }}</div>
+    {% if note %}
+      <div class="form-text mt-1">{{ note }}</div>
+    {% endif %}
+  </div>
+{% endmacro %}

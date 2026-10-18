@@ -1,70 +1,92 @@
 {% extends "base.html" %}
-{% block title %}Eligibility rules — India Vehicle Import{% endblock %}
+{% import "macros/components.html" as ui %}
+
+{% block title %}Statutory Import Rules — India Customs Compliance{% endblock %}
+{% block meta_desc %}Review active vehicle import eligibility rules and CPD carnet conditions evaluated by the database decision engine.{% endblock %}
 
 {% block content %}
 <div class="mb-4">
-  <h1 class="mb-1">Eligibility rules</h1>
-  <p class="text-muted" style="font-size:.9375rem;max-width:58ch;">
-    These rules are stored in the database and evaluated by a MySQL stored procedure for each application.
-    All active rules are shown below.
+  <nav aria-label="breadcrumb">
+    <ol class="breadcrumb mb-2" style="font-size: 0.8125rem;">
+      <li class="breadcrumb-item"><a href="{{ url_for('index') }}">Home</a></li>
+      <li class="breadcrumb-item active" aria-current="page">Rules</li>
+    </ol>
+  </nav>
+  <h1 class="mb-1">Statutory import eligibility rules</h1>
+  <p class="text-muted mb-0" style="font-size: 0.9375rem; max-width: 65ch;">
+    These rules are stored in the relational database and executed deterministically by a MySQL stored procedure for every application.
   </p>
 </div>
 
-{# Group rules by import type (None = all types) #}
-{% set type_groups = {} %}
-{% for rule in rules %}
-  {% set key = rule.import_type or 'All import categories' %}
-  {% if key not in type_groups %}{% set _ = type_groups.update({key: []}) %}{% endif %}
-  {% if type_groups[key].append(rule) %}{% endif %}
-{% endfor %}
-
 {% if not rules %}
-<div class="app-card">
-  <div class="empty-state">
-    <div class="empty-state-icon">📋</div>
-    <h4>No active rules</h4>
-    <p>An admin can add rules in the admin panel.</p>
+  <div class="app-card">
+    <div class="app-card-body p-0">
+      {{ ui.empty_state("📋", "No active rules found", "There are currently no active rules in force.", url_for('check'), "Check eligibility") }}
+    </div>
   </div>
-</div>
 {% else %}
 
-{# Fall back to flat list because Jinja dict construction is limited #}
-{# We'll group by rendering distinct import_type headers #}
-{% set seen_types = [] %}
-{% for rule in rules %}
-  {% if rule.import_type not in seen_types %}
-    {% if seen_types %}
-    </tbody></table></div></div>
-    {% endif %}
-    <div class="app-card mb-3">
-      <div class="app-card-header">
-        <h3>{{ rule.import_type.replace('_',' ').title() if rule.import_type else 'All import categories' }}</h3>
+  {# Group rules by distinct import categories #}
+  {% set seen_types = [] %}
+  {% for rule in rules %}
+    {% if rule.import_type not in seen_types %}
+      {% if seen_types %}
+          </tbody>
+        </table>
       </div>
-      <div class="app-card-body p-0">
-        <div class="table-scroll">
-        <table class="table mb-0">
-          <thead><tr>
-            <th>Rule</th>
-            <th>Check type</th>
-            <th>Requirement</th>
-            <th>Effective from</th>
-            <th>Last updated</th>
-          </tr></thead>
-          <tbody>
-    {% if seen_types.append(rule.import_type) %}{% endif %}
+    </div>
+  </div>
+      {% endif %}
+
+      <div class="app-card mb-4">
+        <div class="app-card-header">
+          <h3>
+            {{ rule.import_type.replace('_',' ').title() if rule.import_type else 'Universal rules (All categories)' }}
+          </h3>
+          <span class="badge badge-info">{{ rule.import_type or 'ALL_CATEGORIES' }}</span>
+        </div>
+        <div class="app-card-body p-0">
+          <div class="table-scroll">
+            <table class="table mb-0">
+              <thead>
+                <tr>
+                  <th>Rule name</th>
+                  <th>Check type</th>
+                  <th>Requirement</th>
+                  <th>Effective from</th>
+                  <th>Last updated</th>
+                </tr>
+              </thead>
+              <tbody>
+      {% if seen_types.append(rule.import_type) %}{% endif %}
+    {% endif %}
+
+    <tr>
+      <td class="fw-600">{{ rule.rule_name }}</td>
+      <td>
+        <span class="badge badge-inactive">{{ rule.rule_type.replace('_',' ').title() }}</span>
+      </td>
+      <td class="mono fw-500">{{ rule.operator }} {{ rule.expected_value }}</td>
+      <td class="text-muted">{{ rule.effective_date }}</td>
+      <td class="text-muted">{{ rule.last_updated }}</td>
+    </tr>
+  {% endfor %}
+
+  {% if rules %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
   {% endif %}
-        <tr>
-          <td class="fw-600">{{ rule.rule_name }}</td>
-          <td><span class="badge badge-inactive" style="font-size:.65rem;text-transform:uppercase;letter-spacing:.03em;">{{ rule.rule_type.replace('_',' ') }}</span></td>
-          <td class="mono">{{ rule.operator }} {{ rule.expected_value }}</td>
-          <td class="text-muted">{{ rule.effective_date }}</td>
-          <td class="text-muted">{{ rule.last_updated }}</td>
-        </tr>
-{% endfor %}
-{% if rules %}
-        </tbody></table></div></div>
-{% endif %}
 
 {% endif %}
+
+<div class="mt-4">
+  <a href="{{ url_for('check') }}" class="btn btn-primary">
+    <span>Test these rules against a vehicle</span>
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+  </a>
+</div>
 
 {% endblock %}
